@@ -33,6 +33,7 @@ This file captures "work in progress" notes.
 5. Configurers - find your way around it
   - OAuth2 Login configurer? SamlLoginConfigurer?
   - Fix the SAML bug :D
+6. Spring Boot autoconfigurer
 
 
 

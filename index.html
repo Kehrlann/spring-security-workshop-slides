@@ -16,10 +16,16 @@
 
 		<link rel="stylesheet" href="dist/reset.css">
 		<link rel="stylesheet" href="dist/reveal.css">
-		<link rel="stylesheet" href="dist/theme/black.css" id="theme">
+		<link rel="stylesheet" href="dist/theme/white.css" id="theme">
 
 		<!-- Theme used for syntax highlighting of code -->
 		<link rel="stylesheet" href="plugin/highlight/monokai.css">
+
+    <style>
+      .reveal pre {
+        width: 100%;
+      }
+    </style>
 	</head>
 
 	<body>
@@ -37,11 +43,9 @@
             Devoxx FR - 2022/04/20
 
             Daniel Garnier-Moiroux
-          </script>
-        </section>
 
-        <section data-markdown>
-          <script type="text/template">
+            ---
+
             ## Daniel Garnier-Moiroux
 
             <img src="images/profile_picture.jpeg" height="200px" style="border-radius: 50%;">
@@ -94,20 +98,80 @@
 
             Notes:
 
-            start.spring.io / Gradle / Java 11 / Boot 2.6.x
+            - start.spring.io
+            - gradle
+            - java 11 
+            - Boot 2.6.x
+            - web + devtools
+            - NOT security yet
+
+            ---
+            
+            **HelloWorldController.java**
+
+            ```java
+            @RestController
+            public class HelloWorldController {
+
+              @GetMapping("/")
+              public String publicPage() {
+                return "Hello World!";
+              }
+
+              @GetMapping("private")
+              public String privatePage() {
+                return "Mmmmh, this should be private 🤔";
+              }
+
+            }
+            ```
+
+            Notes:
+
+            - Spring Boot classique, une page publique + une privée
+            - Montrer dans le browser
+
+            ---
+
+            **build.gradle**
+
+            ```gradle
+            dependencies {
+              implementation 'org.springframework.boot:spring-boot-starter-web'
+              implementation 'org.springframework.boot:spring-boot-devtools'
+              implementation 'org.springframework.boot:spring-boot-starter-security'
+              testImplementation 'org.springframework.boot:spring-boot-starter-test'
+            }
+            ```
+
+            Notes:
+
+            - Ajouter Spring Security
+            - Montrer dans le browser
+            - Montrer les logs
+            - Montrer SecurityAutoConfiguration
+
+            ---
+
+            **SecurityConfig.java**
+
+            ```java
+            @Configuration
+            @EnableWebSecurity
+            public class SecurityConfig {
+
+              @Bean
+              SecurityFilterChain securityFilterChain(HttpSecurity http) 
+                  throws Exception {
+                return http.authorizeRequests()
+                      .antMatchers("/").permitAll()
+                      .anyRequest().authenticated()
+                    .and()
+                    .build();
+              }
+            }
+            ```
           </script>
-        </section>
-        <section>
-          <section>
-            <aside class="notes">
-              Hidden notes
-            </aside>
-          </section>
-          <section>
-            <aside class="notes">
-              More Hidden notes
-            </aside>
-          </section>
         </section>
 
 		</div>
