@@ -25,6 +25,11 @@
       .reveal pre {
         width: 100%;
       }
+
+      .reveal :not(pre)>code {
+        /* TODO */
+        color: red;
+      }
     </style>
 	</head>
 
@@ -135,7 +140,7 @@
 
             **build.gradle**
 
-            ```gradle
+            ```gradle [4]
             dependencies {
               implementation 'org.springframework.boot:spring-boot-starter-web'
               implementation 'org.springframework.boot:spring-boot-devtools'
@@ -165,24 +170,288 @@
                   throws Exception {
                 return http.authorizeRequests()
                       .antMatchers("/").permitAll()
+                      .antMatchers("/error").permitAll() // error page
                       .anyRequest().authenticated()
-                    .and()
-                    .build();
+                    .and().build();
               }
             }
             ```
+
+            Notes:
+
+            - SecurityFilterChain
+            - D'abord "/private" .authenticated()
+            - Puis le pattern "correct"
+            - Notez: on ne peut pas se logguer!
+
+            ---
+
+            **SecurityConfig.java**
+
+            ```java [10]
+            public class SecurityConfig {
+
+              @Bean
+              SecurityFilterChain securityFilterChain(HttpSecurity http) 
+                  throws Exception {
+                return http.authorizeRequests()
+                      .antMatchers("/").permitAll()
+                      .antMatchers("/error").permitAll() // error page
+                      .anyRequest().authenticated()
+                    .and().formLogin()
+                    .and().build();
+              }
+            }
+            ```
+
+            Notes:
+
+            - Ca réactive le form login de Spring Security
+            - Toujours mot de passe auto-généré
+
+            ---
+
+            **SecurityConfig.java**
+
+            ```java [13-14]
+            @Configuration
+            @EnableWebSecurity
+            public class SecurityConfig {
+              // [...]
+              @Bean
+              UserDetailsService userDetailsService() {
+                return new InMemoryUserDetailsManager(
+                    new User("user", "{noop}password", Collections.emptyList())
+                );
+              }
+            }
+            ```
+
+            Notes:
+
+            - On peut créer des @Beans qui font des choses
+            - On trouve ça dans la doc/les guides
+            - CF la doc?
+            - On peut aussi ajouter d'autres modules de Spring Security
+
+            ---
+
+            **build.gradle**
+
+            ```gradle [5]
+            dependencies {
+              implementation 'org.springframework.boot:spring-boot-starter-web'
+              implementation 'org.springframework.boot:spring-boot-devtools'
+              implementation 'org.springframework.boot:spring-boot-starter-security'
+              implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+              testImplementation 'org.springframework.boot:spring-boot-starter-test'
+            }
+            ```
+
+            Notes:
+
+            - Login oauth2/open id
+            - Est-ce que vous êtes familiers avec OAuth2? 
+            - On ne va pas parler du protocole en particulier
+            - Mais le combo boot + security permet de juste changer la config
+            - Et activer un nouveau type de login
+            
+            ---
+
+            **SecurityConfig.java**
+
+            ```java [10]
+            public class SecurityConfig {
+
+              @Bean
+              SecurityFilterChain securityFilterChain(HttpSecurity http) 
+                  throws Exception {
+                return http.authorizeRequests()
+                      .antMatchers("/").permitAll()
+                      .antMatchers("/error").permitAll() // error page
+                      .anyRequest().authenticated()
+                    .and().oauth2Login()
+                    .and().build();
+              }
+            }
+            ```
+
+            Notes:
+
+            - Activer le nouveau type de login
+
+            ---
+
+            **application.yml**
+
+            ```yaml
+            spring:
+             security:
+              oauth2:
+               client:
+                 registration:
+                   google: # magic name, [google|facebook|github]
+                    client-id: "PLACEHOLDER"
+                    client-secret: "PLACEHOLDER"
+            ``` 
+
+            Notes:
+
+            - Ajouter google via console.cloud.google.com
+            - Search Api Keys, Add new OAuth2 Login
+            - redirect url: 
+
+            `http://localhost:8080/login/oauth2/code/google`
+
+            - Configurer le client-id/secret
+            - Login: tadaa!
+
+            ---
+
+            **HelloWorldController.java**
+
+            ```java [3-8]
+            public class HelloWorldController {
+
+              @GetMapping("private")
+              public String privatePage(Principal principal) {
+                return "Welcome to this very private page, ~[" 
+                    + getName(principal) 
+                    + "]~! 🥳🎉🍾";
+              }
+
+              private String getName(Principal principal) {
+                // ...
+              }
+            }
+            ```
+
+            Notes:
+
+            - On peut injecter le principal
+            - Et afficher le nom
+
+            ---
+
+            **HelloWorldController.java**
+
+            ```java
+            public class HelloWorldController {
+
+              private String getName(Principal principal) {
+                return Optional.of(principal)
+                  .filter(OAuth2AuthenticationToken.class::isInstance)
+                  .map(OAuth2AuthenticationToken.class::cast)
+                  .map(OAuth2AuthenticationToken::getPrincipal)
+                  .map(OidcUser.class::cast)
+                  .map(StandardClaimAccessor::getEmail)
+                  .orElseGet(principal::getName);
+              }
+            }
+            ```
+
+            Notes:
+
+            - maintenant le nom c'est un peu moche via google
+            - c'est un guid dans le cadre de ce serveur
+            - on peut extraire l'e-mail mais c'est touchy...
+
+            ---
+
+            ## Alors?
+
+            C'est compliqué, n'est-ce pas? <!-- .element: class="fragment" -->
+            
+            Notes:
+
+            - Compliqué n'est-ce pas?
+
+            ---
+
+            ## 2. Un peu de théorie
+
+            Notes:
+
+            - Le but de la démo ce n'est pas que vous sachiez reproduire
+            - Ni même que vous reteniez
+            - Juste montrer que c'est compliqué
+            - Et donner une base de discussion
+
+            ---
+
+            ### Côté "consommateur"
+
+            Spring Security produit des `Authentication`. Celles-ci sont utilisées pour:
+            - Authentification (`authn`): _qui_ est le user?
+            - Authorization (`authz`): est-ce que le user _à le droit de faire_ XYZ?
+
+            ---
+
+            ### Un peu de vocabulaire
+
+            - **Authentication**: représente l'utilisateur. Contient:
+              - **Principal**: "identité" de l'utilsateur (nom, email...)
+              - **GrantedAuthorities**: "permissions" (`roles`, ...)
+              - (Credentials): "password", souvent mis à `null`
+            
+            Plus de détails: https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
+
+            Notes:
+
+            - Authentication: ce que Spring Sec produit ...
+            - Principal: "qui", c'est ce qui vous intéresse le plus
+            - Montrer les classes
+            - Notez que `Authentication` est une sous-classe de `Principal`, avec plus d'infos
+            - Notez que Principal est souvent un `Object`
+              - grand thème de la flexibilité spring-sec
+
+            ---
+
+            ### Maximum confusion
+
+            ```java [|2|6]
+            public interface Authentication 
+              extends Principal,
+              Serializable {
+
+              // [...]
+              Object getPrincipal();
+            }
+            ```
+
+            Notes:
+
+            - extends Principal: java.security.Principal
+            - getPrincipal: renvoie souvent une `Authentication`
+              - Mais `Object` comme ça super extensible
+              - Très, très, très confusant
+
+            ---
+
+            ## Et du coup
+
+            ```java
+            @Override
+            public boolean supports(final Class<?> authentication) {
+              return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication))
+                  || (CasAuthenticationToken.class.isAssignableFrom(authentication))
+                  || (CasAssertionAuthenticationToken.class.isAssignableFrom(authentication));
+            }
+            ```
+
+
           </script>
         </section>
 
-		</div>
+    </div>
 
-		<script src="dist/reveal.js"></script>
-		<script src="plugin/zoom/zoom.js"></script>
-		<script src="plugin/notes/notes.js"></script>
-		<script src="plugin/search/search.js"></script>
-		<script src="plugin/markdown/markdown.js"></script>
-		<script src="plugin/highlight/highlight.js"></script>
-		<script>
+    <script src="dist/reveal.js"></script>
+    <script src="plugin/zoom/zoom.js"></script>
+    <script src="plugin/notes/notes.js"></script>
+    <script src="plugin/search/search.js"></script>
+    <script src="plugin/markdown/markdown.js"></script>
+    <script src="plugin/highlight/highlight.js"></script>
+    <script>
 
 			// Also available as an ES module, see:
 			// https://revealjs.com/initialization/
