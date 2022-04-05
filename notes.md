@@ -51,6 +51,7 @@ This file captures "work in progress" notes.
 
 ## Things to explore / try
 
+- Devoxx template?
 - SecurityFilterInterceptor or AuthorizationFilter for example purposes
 - AbstractAuthenticationFilter, how to use it?
 - ProviderManager, interesting use-cases
