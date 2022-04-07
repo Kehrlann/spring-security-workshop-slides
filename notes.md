@@ -55,6 +55,7 @@ This file captures "work in progress" notes.
 - SecurityFilterInterceptor or AuthorizationFilter for example purposes
 - AbstractAuthenticationFilter, how to use it?
 - ProviderManager, interesting use-cases
+- Kotlin DSL
 
 
 

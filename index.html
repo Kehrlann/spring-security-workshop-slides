@@ -93,9 +93,17 @@
 
             Notes:
 
-            On va parler de beaucoup de choses, c'est très dense.
-
-            Le but de la présentation, c'est que vous puissiez naviguer seuls dans spring-security
+            - On va parler de beaucoup de choses, c'est très dense.
+            - Le but de la présentation: votre autonomie
+              - naviguer seuls dans spring-security
+              - pas coincés sur StackOverflow à ne rien comprendre
+            - PAS LE BUT: vous montrer plein de features que vous ne retiendrez pas
+              - On va rester très concentrés sur l'authentification, l'identité
+              - Pas beaucoup parler d'authorization, la "permission"
+            - Aussi: on va faire que du Servlet, pas du Réactif
+              - C'est un peu différent et je ne suis pas un expert
+            - Caveat: niveau intermédiaire, pas débutant
+              - Si vous n'avez jamais vu Spring, oups
 
             ---
 
@@ -521,6 +529,77 @@
             - SecurityContextHolder -> SecurityContext
             - Objet qui nous intéresse, une Authentication
               - Avec un Principal (identité) et GrantedAuthorities ("permissions")
+
+            ---
+
+            ## Plan
+
+            1. Démo de base
+            2. Théorie
+                1. Authentication - "domain language"
+                2. Filter - "bloc de base HTTP" <!-- .element: class="fragment highlight-blue" -->
+                3. AuthenticationProviders - "authentifier"
+                4. Configurers - "naviguer dans spring-security"
+
+            Notes:
+
+            - On a vu Authentication, et comment utiliser ce que Spring Security produit
+              - Pas le coeur de cette présentation
+              - Mais important de parler de que c'est
+            - Maintenant voyons un peu comment Spring Secrity produit des authentifications!
+            - Spring Security ca securise des endpoints HTTP
+
+            ---
+
+            ## Servlet Filters
+
+            <img src="images/filterchain.png" height="500px">
+
+            Notes:
+            - Ca c'est l'archi Servlet, pas juste spring sec
+            - Chaque élément (filtre + servlet) a accès aux objets requete et réponse
+            - Un client envoie une requête, le container servlet crée une chaîne de filtres,
+              exécutés dans l'ordre, puis la servlet qui doit traiter la réponse
+            - Filters == "pre-processing"
+              - Soit couper la connection + écrire la réponse (think: CSRF)
+              - Soit modifier la Requête ou la Réponse, ou "le contexte 
+
+            ---
+
+            ## Spring Security Filter Chain
+
+            TODO
+            TODO
+            TODO
+            TODO
+            TODO
+            TODO
+            TODO
+            TODO
+
+            ---
+
+            ## Spring Security Filters
+
+            ```java
+            public void doFilter(
+              HttpServletRequest request, 
+              HttpServletResponse response, 
+              FilterChain chain) {
+                // 1. Avant de continuer (e.g. authentication)
+                // ...
+
+                // 2. Invocation de "la suite"
+                chain.doFilter(request, response);
+
+                // 3. Une fois que la requête a été gérée
+                // ...
+            }
+            ```
+
+            Notes:
+            - Dans une classe `Filter` ça ressemble à ça
+            - Ça veut dire que chaque filter appelle "la suite", c'est pas une boucle for
 
             ---
 
