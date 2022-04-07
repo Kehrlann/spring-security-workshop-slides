@@ -183,6 +183,7 @@
                 return http.authorizeRequests()
                       .antMatchers("/").permitAll()
                       .antMatchers("/error").permitAll() // error page
+                      .antMatchers("/favicon.io").permitAll() // favicon
                       .anyRequest().authenticated()
                     .and().build();
               }
@@ -209,6 +210,7 @@
                 return http.authorizeRequests()
                       .antMatchers("/").permitAll()
                       .antMatchers("/error").permitAll() // error page
+                      .antMatchers("/favicon.io").permitAll() // favicon
                       .anyRequest().authenticated()
                     .and().formLogin()
                     .and().build();
@@ -281,6 +283,7 @@
                 return http.authorizeRequests()
                       .antMatchers("/").permitAll()
                       .antMatchers("/error").permitAll() // error page
+                      .antMatchers("/favicon.io").permitAll() // favicon
                       .anyRequest().authenticated()
                     .and().oauth2Login()
                     .and().build();
@@ -566,16 +569,41 @@
 
             ---
 
-            ## Spring Security Filter Chain
+            ## Spring Security Filter Chain - 1
 
-            TODO
-            TODO
-            TODO
-            TODO
-            TODO
-            TODO
-            TODO
-            TODO
+            <img src="images/delegatingfilterproxy.png" height="500px">
+
+            Notes:
+
+            - Spring apporte ses propres abstractions pour câbler des Filtres
+            - (Lifecycle différent: les filtres doivent être créés à la création du container,
+            différent du lifecycle de l'application contenxt spring)
+
+            ---
+
+            ## Spring Security Filter Chain - 2
+
+            <img src="images/filterchainproxy.png" height="500px">
+
+            Notes:
+
+            - Et Spring Security aussi ..., tout ca, ca descend
+
+            ---
+
+            ## Spring Security Filter Chain - 3
+
+            <img src="images/securityfilterchain.png" height="500px">
+
+            Notes:
+
+            - Ca descend, jusqu'à ce qui nous intéresse... la SecurityFilterChain
+            - C'est un peu plus subtil mais on va en rester là
+            - (En fait, il peut y avoir plusieurs SecurityFilterChains, managées par le
+            FilterChainProxy, protégeant chacun un "path" différent avec des filtres différents)
+            - La SecurityFilterChain c'est comme une filter chain normale, mais avec quelques
+            fonctionnalités par défaut en plus ; et c'est un point d'entrée dans Spring Security
+            - Montrer: breakpoint dans DefaultSecurityFilterChain constructeur
 
             ---
 
@@ -598,12 +626,138 @@
             ```
 
             Notes:
+
             - Dans une classe `Filter` ça ressemble à ça
             - Ça veut dire que chaque filter appelle "la suite", c'est pas une boucle for
 
             ---
 
+            ## Filters - diagramme objet
 
+            <img src="images/filterchain-objects.jpg" height="500px">
+
+            Notes:
+
+            - En représentant un peu les objets, ça donne ça
+            - Expliquer
+
+            ---
+
+            ## Filters - callstack
+
+            <img src="images/filterchain-callstack-1.jpg" height="500px">
+
+            Notes:
+
+            - Donc si on représente le diagramme précédent sous forme de call stack...
+            - Donc si il y a une exception dans le filtre3, elle peut être attrapée par le fitlre2
+  
+            ---
+
+            ## Filters - callstack
+
+            <img src="images/filterchain-callstack-2.jpg" height="500px">
+
+            Notes:
+
+            - En pratique, ça donne des stack traces un peu compliquées...
+
+            ---
+
+            ## ... respirez 🧘 ...
+
+            <img src="images/kitten.gif" height="500px">
+
+            Notes:
+            
+            - Promis on en sort doucement
+            - Respirez, profitez, étirez-vous
+
+            ---
+
+            ## ... respirez 🧘 ...
+
+            <img src="images/puppy.gif" height="500px">
+
+            Notes:
+            
+            - Il n'y en a pas que pour les chats
+            - On va faire du code! Allez!
+
+            ---
+
+            ## Spring Security Filters
+
+            ```java
+            public void doFilter(
+              HttpServletRequest request, 
+              HttpServletResponse response, 
+              FilterChain chain) {
+                // 1. Avant de continuer (e.g. authentication)
+                // ...
+
+                // 2. Invocation de "la suite"
+                chain.doFilter(request, response);
+
+                // 3. Une fois que la requête a été gérée
+                // ...
+            }
+            ```
+
+            Notes:
+
+            - Vous vous rappelez?
+            - Implémentons notre propre Filter...
+
+
+            ---
+
+            ## RobotAccountFilter.java
+
+            ```java
+            public class RobotAccountFilter extends OncePerRequestFilter {
+              @Override
+              protected void doFilterInternal(
+                  HttpServletRequest request,
+                  HttpServletResponse response,
+                  FilterChain filterChain)
+                  throws ServletException, IOException {
+                System.out.println("HELLO FROM ROBOT FILTER 🤖");
+              }
+            }
+            ```
+
+            Notes:
+
+            - Pour l'instant jamais exécuté...
+
+            ---
+
+            ## SecurityConfig.java
+
+            ```java [11-13]
+            @Bean
+            SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+              return http.authorizeRequests()
+                    .antMatchers("/").permitAll()
+                    .antMatchers("/error").permitAll()
+                    .antMatchers("/favicon.ico").permitAll()
+                    .anyRequest().authenticated()
+                  .and().formLogin()
+                  .and().oauth2Login()
+                  .and()
+                    .addFilterBefore(
+                      new RobotAccountFilter(),
+                      UsernamePasswordAuthenticationFilter.class)
+                  .build();
+            }
+            ```
+
+            Notes:
+
+            - Il faut qu'on le mette quelque part dans la chaîne
+            - On sait qu'on a un UsernamePasswordAuthenticationFilter
+            - Montrer, expliquer pourquoi 2 fois
 
           </script>
         </section>
