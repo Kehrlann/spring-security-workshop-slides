@@ -201,7 +201,7 @@
 
             **SecurityConfig.java**
 
-            ```java [10]
+            ```java [11]
             public class SecurityConfig {
 
               @Bean
@@ -246,6 +246,7 @@
             - On peut créer des @Beans qui font des choses
             - On trouve ça dans la doc/les guides
             - CF la doc?
+            - Démo!
             - On peut aussi ajouter d'autres modules de Spring Security
 
             ---
@@ -274,7 +275,7 @@
 
             **SecurityConfig.java**
 
-            ```java [10]
+            ```java [12]
             public class SecurityConfig {
 
               @Bean
@@ -285,6 +286,7 @@
                       .antMatchers("/error").permitAll() // error page
                       .antMatchers("/favicon.io").permitAll() // favicon
                       .anyRequest().authenticated()
+                    .and().formLogin();
                     .and().oauth2Login()
                     .and().build();
               }
@@ -729,7 +731,13 @@
 
             Notes:
 
-            - Pour l'instant jamais exécuté...
+            - Commencer par implements Filter, mais ça c'est du javax.servlet
+            - Je vous ai recommandé de n'utiliser que des classes Security
+              - en plus, si vous faites filter, faut se poser la question des métodes lifecycle...
+              - au moins GenericFilterBean, spring-web, pas de questions
+              - mieux: OncePerRequestFilter - le nom est assez éloquent
+            - On va juste faire un log
+            - Pour l'instant jamais exécuté, faire un curl pour montrer
 
             ---
 
@@ -757,7 +765,107 @@
 
             - Il faut qu'on le mette quelque part dans la chaîne
             - On sait qu'on a un UsernamePasswordAuthenticationFilter
-            - Montrer, expliquer pourquoi 2 fois
+            - Montrer dans le browser, expliquer pourquoi ça apparaît 2 fois
+
+            ---
+
+            ## RobotAccountFilter.java
+
+            ```java [3-8|9-14]
+            @Override
+            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+              String password = request.getHeader("x-robot-password");
+              if ("beep-boop".equals(password)) {
+                var newContext = SecurityContextHolder.createEmptyContext();
+                newContext.setAuthentication(new RobotAuthentication());
+                SecurityContextHolder.setContext(newContext);
+                chain.doFilter(request, response);
+              } else {
+                response.setStatus(HttpStatus.UNAUTHORIZED.value());
+                response.setCharacterEncoding("utf-8");
+                response.getWriter().println("You are not Mr Robot... 🤖");
+                return;
+              }
+            }
+            ```
+
+            Notes:
+            - On va lire un header
+            - Si le header a la bonne valeur, on va mettre une authentification
+              - PAS UsernamePasswordAuthenticationToken!! Montrer ce qu'on pourrait mettre dedans.
+              - Pour l'instant, créer la classe mais vide
+            - On la set dans le context holder, et chain.doFilter()
+            - Sinon, on ne fait rien
+
+            ---
+
+            ## RobotAuthentication.java
+
+            ```java
+            public class RobotAuthentication implements Authentication {
+
+              @Override public Object getPrincipal() { return "Mr Robot"; }
+
+              @Override public String getName() { return "Mr Robot"; }
+
+              @Override
+              public Collection<? extends GrantedAuthority> getAuthorities() {
+                return List.of(new SimpleGrantedAuthority("ROLE_robot"));
+              }
+
+              @Override public boolean isAuthenticated() { return true; }
+
+              // ...
+            }
+            ```
+
+            Notes:
+
+            - Authentication minimale
+            - Toujours authentifiée, nom hardcodé
+            - curl vers "private" avec le header -> ça fonctionne !
+            - montrer avec un breakpoint
+            - montrer que browser vers /private c'est pété 401
+            - (Optionel, parler du role)
+
+            ---
+
+            ## RobotAccountFilter.java
+
+            ```java [3-7]
+            @Override
+            protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
+              if (!Collections.list(request.getHeaderNames())
+                .contains("x-robot-password")) {
+                filterChain.doFilter(request, response);
+                return;
+              }
+
+              // ...
+            }
+            ```
+
+            Notes:
+
+            - Vérifier que le header est présent, sinon continuer sans authent'
+            - Le filtre dit "cette requête ne me regarde pas"
+            - COOL! Recap.
+
+            ---
+
+            ## Récap!
+
+            1. Créer un `Filter`: décision d'authentification
+            2. Créer une `Authentication`: résultat d'authentification
+              1. Une classe qui a du sens, pas `UsernamePassword...`
+            3. Monter le `Filter` dans la `SecurityFilterChain`
+
+
+            Notes:
+
+            - Le cas qu'on a montré == vrai cas, si vous avez besoin d'un accès API-only
+            - Bon avec de la _vraie_ sécurité, pas un truc faus comme çå
+            
 
           </script>
         </section>
