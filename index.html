@@ -858,7 +858,7 @@
             1. Créer un `Filter`: décision d'authentification
             2. Créer une `Authentication`: résultat d'authentification
               1. Une classe qui a du sens, pas `UsernamePassword...`
-            3. Monter le `Filter` dans la `SecurityFilterChain`
+            3. Activer le `Filter` dans la `SecurityFilterChain`
 
 
             Notes:
@@ -880,17 +880,20 @@
     <script src="plugin/highlight/highlight.js"></script>
     <script>
 
-			// Also available as an ES module, see:
-			// https://revealjs.com/initialization/
-			Reveal.initialize({
-				controls: true,
-				progress: true,
-				center: true,
-				hash: true,
+      // Also available as an ES module, see:
+      // https://revealjs.com/initialization/
+      Reveal.initialize({
+        controls: true,
+        progress: true,
+        center: true,
+        hash: true,
+        width: 1280,
+        height: 800,
+        transition: 'none',
 
-				// Learn about plugins: https://revealjs.com/plugins/
-				plugins: [ RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight ]
-			});
+        // Learn about plugins: https://revealjs.com/plugins/
+        plugins: [ RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight ]
+      });
 
 		</script>
     <script src="socket.io/socket.io.js"></script>
