@@ -28,7 +28,11 @@
 
       .reveal :not(pre)>code {
         /* TODO */
-        color: red;
+        color: #a31515;
+        padding: 2px 5px;
+        background-color: #f8f8f8;
+        border: solid 1px #ddd;
+        border-radius: 3px;
       }
 
       :root {
@@ -864,9 +868,77 @@
             Notes:
 
             - Le cas qu'on a montré == vrai cas, si vous avez besoin d'un accès API-only
-            - Bon avec de la _vraie_ sécurité, pas un truc faus comme çå
+            - Bon avec de la _vraie_ sécurité, pas un truc hardcodé comme on a fait
+
+            ---
+
+            ## Un "vrai" exemple
+
+            `CsrfFilter.java`
+
+            Notes:
+
+            - Qui connaît le principe de CSRF, Cross Site Request Forgery?
+
+            ---
+
+            ## "Cross Site Request Forgery"
+
+            <img src="images/csrf-exploit.png" height="500px">
+
+            Notes:
+
+            - Attaque maintenant moins courante avec les nouvelles protections de cookies
+            - Idée: se connecter légitimement sur un site (ici: bank)
+            - Un site malicieux a un bouton qui fait un "POST" vers une page du vrai site
+            - Le browser utilise vos cookies pour faire passer la requête comme si elle venait du
+              site principal (ici: bank)
+            
+            ---
+
+            ## Protection
+
+            <img src="images/csrf-protection.png" height="500px">
+
+            `<input type="hidden" name="_csrf" value="yyy" />` <!-- .element: class="fragment" -->
+            
+            Notes:
+
+            - Idée, générer un token à chaque requête, stocké dans la session
+            - Partager ce token dans tous les forms générés
+
+            ---
+
+            ## Un "vrai" exemple
+
+            Spring Security: `CsrfFilter.java`
+
+            Notes:
+
+            - Montrer le code
+            - Notez: on ne peut pas _vraiment_ étendre Spring Security pour ses propres use-cases
+              sans comprendre les concepts / protocoles sous-jacents
+              - Ex: OAuth2 Login...
+            
+            ---
+
+            ## Plan
+
+            1. Démo de base
+            2. Théorie
+                1. Authentication - "domain language"
+                2. Filter - "bloc de base HTTP"
+                3. AuthenticationProviders - "authentifier" <!-- .element: class="fragment highlight-blue" -->
+                4. Configurers - "naviguer dans spring-security"
             
 
+            Notes:
+
+              - 
+
+              ---
+
+            ## Foobar
           </script>
         </section>
 
