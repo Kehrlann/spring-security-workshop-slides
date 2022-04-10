@@ -22,9 +22,9 @@ This file captures "work in progress" notes.
     - Example filter: SecurityFilterInterceptor or AuthorizationFilter
   - Let's write a filter
     - Let's write a filter! E.g., require a specific header or kill the request
-    - Move on to AbstractAuthenticationFilter 
     - Write a custom Authentication in the filter directly and shove it in the
       SecurityContextHolder
+    - Transform the filter into an AuthenticationFilter
 4. AuthenticationManager
   - AuthenticationManager and specifically ProviderManager
   - Example with auth overloading, e.g. "GeoIP" or "Weather" or whatev's
