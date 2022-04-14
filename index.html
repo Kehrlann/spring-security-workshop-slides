@@ -1336,16 +1336,196 @@
 
             ---
 
-            Foo bar
+            ## Configurers
+
+            Tout, dans `HttpSecurity`, renvoie ou interagit avec un "builder"
 
             Notes:
 
+            - Ex: httpBasic, formLogin, oauth2Login, authorizeHttpRequests
+            - Extends: AbstractHttpConfigurer, et permet d'interagir avec le httpSecurity
+
+            ---
+
+            ## RobotConfigurer.java
+
+            ```java [1-2|11-15|17-23|4-8]
+            public class RobotAccountConfigurer
+                extends AbstractHttpConfigurer<RobotAccountConfigurer, HttpSecurity> {
+
+              private final Set<String> passwords = new HashSet<>();
+
+              public RobotAccountConfigurer password(String password) {
+                this.passwords.add(password);
+                return this;
+              }
+
+              @Override
+              public void init(HttpSecurity http) {
+                var passwords = this.passwords.toArray(new String[]{});
+                http.authenticationProvider(new RobotAuthenticationProvider(passwords));
+              }
+
+              @Override
+              public void configure(HttpSecurity http) throws Exception {
+                var authManager = http.getSharedObject(AuthenticationManager.class);
+                http.addFilterBefore(
+                  new RobotAccountFilter(authManager),
+                  UsernamePasswordAuthenticationFilter.class);
+              }
+
+            }
+            ```
+
+            Notes:
+
+            - Etend un type un peu compliqué pour le pattern "builder"
+            - Deux méthodes importantes, init et configure
+              - init, enregistrer les authentication providers
+              - configure, enregistrer les filtres (accès à plus d'objets + autres configurers déjà
+                initialisés)
+            - éventuellement, le header
             - AbstractConfiguredSecurityBuilder#doBuild
+
+            ---
+
+            ## SecurityConfig.java
+
+            ```java
+            @Bean
+            SecurityFilterChain securityFilterChain(/* .. */) throws Exception {
+              // ...
+
+              // @formatter:off
+              return http
+                  // ...
+                  .and().apply(new RobotAccountConfigurer())
+                    .password("beep-boop")
+                    .password("boop-beep")
+                  .and().build();
+              // @formatter:on
+            }
+            ```
+
+            Notes:
+
+            - modifier le header aussi?
+            - câbler dans SecurityConfig, utiliser le builder
+
+
+            ---
+
+            ## FormLoginConfigurer
+
+            ```java [1-5|9-17|21-28]
+            http.formLogin()
+              .loginPage("/custom-login-page")
+              .passwordParameter("pw")
+              .usernameParameter("user")
+              .authenticationDetailsSource(new WebAuthenticationDetailsSource());
+              .and() // retourne HttpSecurity
+
+            // equivalent:
+
+            FormLoginConfigurer<HttpSecurity> loginConfigurer =
+              new FormLoginConfigurer<HttpSecurity>()
+                .loginPage("/custom-login-page")
+                .passwordParameter("pw")
+                .usernameParameter("user")
+                .authenticationDetailsSource(new WebAuthenticationDetailsSource());
+            http.apply(loginConfigurer)
+              .and() // HttpSecurity
+
+            // equivalent:
+
+            .and().formLogin(configurer -> {
+                configurer.loginPage("/custom-login-page")
+                    .passwordParameter("pw")
+                    .usernameParameter("user")
+                    .authenticationDetailsSource(new WebAuthenticationDetailsSource());
+              }) // pas de .and(), retourne HttpSecurity directement
+            ```
+
+            Notes:
+
+            - 3 façons d'intéragir avec les configurers "built-in"
+              - dans la filter chain
+              - en dehors
+              - avec un "customizer", ça crée le Configurer et le "modifie" tout de suite
+                - intérêt: Kotlin!
+
+            ---
+
+            ## Kotlin
+
+            ```kotlin
+            http {
+              authorizeRequests {
+                authorize(anyRequest, authenticated)
+              }
+              formLogin { }
+              httpBasic { }
+            }
+
+            // equivalent
+
+            http.authorizeRequests()
+              .anyRequest().authenticated()
+              .and()
+            .formLogin().and()
+            .httpBasic()
+            ```
+
+            Notes:
+
+            - Qui fait du Kotlin?
+            - Semblable à la DSL Kotlin pour spring MVC / router { } (cf: KoFu)
+
+            ---
+
+            ## withDefaults()
+
+            ```java [1-4|8-12|15-19]
+            http
+              .formLogin(withDefaults())
+              .httpBasic(withDefaults())
+              .csrf(withDefaults())
+
+            // equivalent
+
+            http
+              .formLogin(configurer -> {})
+              .httpBasic(configurer -> {})
+              .csrf(configurer -> {})
+
+            // equivalent
+
+            http
+              .formLogin().and()
+              .httpBasic().and()
+              .csrf().and()
+            ```
+
             ---
 
             ## Bonus!
 
             RobotAccountFilter extends AuthenticationFilter
+
+            ---
+
+            TODO:
+            - Spring Security patterns
+              - https://www.youtube.com/watch?v=xEnvAAhMGu4
+              - authenticated by default / secure by default
+              - immutability
+              - composability & final classes
+                - JwtGrantedAuthoritiesConverter
+              - ...?
+              - Least priviledge (401 on "unknown endpoint", priviledged info)
+              - Injection
+
+            - logging.level.org.springframework.security: TRACE
           </script>
         </section>
 
