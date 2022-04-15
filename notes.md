@@ -31,11 +31,8 @@ This file captures "work in progress" notes.
   - Also show the event handling with ProviderManager
   - Federated identity?
 5. Configurers - find your way around it
-  - OAuth2 Login configurer? SamlLoginConfigurer?
-  - Fix the SAML bug :D
+  - Custom Configurer
 6. Spring Boot autoconfigurer
-
-
 
 
 ## Reference
@@ -48,15 +45,6 @@ This file captures "work in progress" notes.
 - [Authentication architecture](https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html)
 
 
-
-## Things to explore / try
-
-- Devoxx template?
-- Kotlin DSL
-- RobotAccountFilter extends AuthenticationFilter
-
-
-
 ## Parking lot / ideas
 
 ### Securing an application vs writing a security-driven app
@@ -64,9 +52,3 @@ This file captures "work in progress" notes.
 It's a different beast - guides may be enough for the first case, maybe not so
 for the second.
 
-### Misc topics
-
-- Spring Boot and Spring Sec
-- Spring Sec WITHOUT Boot
-- Servlet apps vs Reactive Apps
-  - Note: no SAML in reactive!

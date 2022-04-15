@@ -43,6 +43,12 @@
 
       :root {
         --r-heading-text-transform: none;
+        --r-heading-color: #1958BF;
+      }
+
+      .reveal h2 {
+        margin-top: 2rem;
+        margin-bottom: 3rem;
       }
     </style>
 	</head>
@@ -101,6 +107,7 @@
                 2. Filter - "bloc de base HTTP"
                 3. AuthenticationProviders - "authentifier"
                 4. Configurers - "naviguer dans spring-security"
+                5. Spring Boot Auto-Configuration
             
 
             Notes:
@@ -136,7 +143,7 @@
 
             ---
             
-            **HelloWorldController.java**
+            ## HelloWorldController.java
 
             ```java
             @RestController
@@ -162,7 +169,7 @@
 
             ---
 
-            **build.gradle**
+            ## build.gradle
 
             ```gradle [4]
             dependencies {
@@ -179,10 +186,12 @@
             - Montrer dans le browser
             - Montrer les logs
             - Montrer SecurityAutoConfiguration
+            - SPRINGSEC PATTERN: secure by default
+              - Faites pareil!
 
             ---
 
-            **SecurityConfig.java**
+            ## SecurityConfig.java
 
             ```java
             @Configuration
@@ -211,7 +220,7 @@
 
             ---
 
-            **SecurityConfig.java**
+            ## SecurityConfig.java
 
             ```java [11]
             public class SecurityConfig {
@@ -237,7 +246,7 @@
 
             ---
 
-            **SecurityConfig.java**
+            ## SecurityConfig.java
 
             ```java [13-14]
             @Configuration
@@ -263,7 +272,7 @@
 
             ---
 
-            **build.gradle**
+            ## build.gradle
 
             ```gradle [5]
             dependencies {
@@ -285,7 +294,7 @@
             
             ---
 
-            **SecurityConfig.java**
+            ## SecurityConfig.java
 
             ```java [12]
             public class SecurityConfig {
@@ -308,10 +317,11 @@
             Notes:
 
             - Activer le nouveau type de login
+            - Spring Security Pattern: all config in one place!
 
             ---
 
-            **application.yml**
+            ## application.yml
 
             ```yaml
             spring:
@@ -337,7 +347,7 @@
 
             ---
 
-            **HelloWorldController.java**
+            ## HelloWorldController.java
 
             ```java [3-8]
             public class HelloWorldController {
@@ -358,11 +368,12 @@
             Notes:
 
             - On peut injecter l'authentication
+              - Spring Security Pattern: injection!
             - Et afficher le nom
 
             ---
 
-            **HelloWorldController.java**
+            ## HelloWorldController.java
 
             ```java
             public class HelloWorldController {
@@ -405,6 +416,7 @@
                 2. Filter - "bloc de base HTTP"
                 3. AuthenticationProviders - "authentifier"
                 4. Configurers - "naviguer dans spring-security"
+                5. Spring Boot Auto-Configuration
 
             Notes:
 
@@ -533,6 +545,8 @@
             - Pratique si nesté!
               - Montrer un FooService
               - Montrer @PreAuthorize()
+            - Spring Security Pattern: all config in one place ...
+              - ... but defense-in-depth!
 
             ---
 
@@ -557,6 +571,7 @@
                 2. Filter - "bloc de base HTTP" <!-- .element: class="fragment highlight-blue" -->
                 3. AuthenticationProviders - "authentifier"
                 4. Configurers - "naviguer dans spring-security"
+                5. Spring Boot Auto-Configuration
 
             Notes:
 
@@ -835,6 +850,8 @@
 
             - Authentication minimale
             - Toujours authentifiée, nom hardcodé
+              - Spring Security Pattern: immutability, pas de "setAuthenticated"
+              - Possible mais pas recommandé (retrocompatibilité)
             - curl vers "private" avec le header -> ça fonctionne !
             - montrer avec un breakpoint
             - montrer que browser vers /private c'est pété 401
@@ -932,6 +949,15 @@
 
             ---
 
+            ## Et les autres Filters?
+
+            ```yaml
+            logging.level:
+              org.springframework.security: TRACE
+            ```
+
+            ---
+
             ## Plan
 
             1. Démo de base
@@ -940,6 +966,7 @@
                 2. Filter - "bloc de base HTTP"
                 3. AuthenticationProviders - "authentifier" <!-- .element: class="fragment highlight-blue" -->
                 4. Configurers - "naviguer dans spring-security"
+                5. Spring Boot Auto-Configuration
             
 
             Notes:
@@ -953,9 +980,9 @@
             
             ---
 
-            ## `Authentication`
+            ## Authentication
 
-            J'ai ~menti~ simplifié un peu.
+            A propos des `Authentication`s... J'ai ~menti~ simplifié un peu.
 
             🤫
 
@@ -970,7 +997,7 @@
 
             ---
 
-            ## `Authentication` (cont'd)
+            ## Authentication (cont'd)
 
             <img src="images/authentication-token.png" height="500px">
 
@@ -985,7 +1012,7 @@
 
             ---
 
-            ## `ProviderManager` et `AuthenticationProvider`
+            ## ProviderManager et AuthenticationProvider
 
 
             <img src="images/providermanager.png" height="500px">
@@ -999,7 +1026,7 @@
 
             ---
 
-            ## `ProviderManager`.parent
+            ## ProviderManager.parent
 
 
             <img src="images/providermanager-parent.png" height="500px">
@@ -1014,7 +1041,7 @@
             
             ---
 
-            ## `AuthenticationProvider.java`
+            ## AuthenticationProvider.java
 
             ```java
             public interface AuthenticationProvider {
@@ -1199,6 +1226,7 @@
 
             - On peut transformer notre truc de Robot pour ressembler plus à Spring Security
             - Deux méthodes statiques pour en créer un
+              - Spring Security Pattern: immutability!
 
             ---
 
@@ -1305,8 +1333,6 @@
               - Mais ça ira pour l'instant!
             - Montrer le curl qui fonctionne + les events dans la console
 
-            TODO: AuthenticationFilter?
-
             ---
 
             ## Récapitulatif!
@@ -1326,6 +1352,7 @@
                 2. Filter - "bloc de base HTTP"
                 3. AuthenticationProviders - "authentifier"
                 4. Configurers - "naviguer dans spring-security" <!-- .element: class="fragment highlight-blue" -->
+                5. Spring Boot Auto-Configuration
 
             Notes:
 
@@ -1411,7 +1438,6 @@
 
             - modifier le header aussi?
             - câbler dans SecurityConfig, utiliser le builder
-
 
             ---
 
@@ -1508,24 +1534,91 @@
 
             ---
 
-            ## Bonus!
+            ## PostProcessor
 
-            RobotAccountFilter extends AuthenticationFilter
+            Comment étendre une classe Spring Security? Exemple:
+
+            > Rate-limit par utilisateur, pour le login Google (pas plus de 1 login / minute par
+              user)
+
+            Notes:
+
+            - Montrer classe finale (problème pour faire Extends!)
+              - InMemoryOAuth2AuthorizedClientService
+              - MappedJwtClaimSetConverter
+           - Essayons de faire que 
+           - Montrer OidcAuthorizationCodeAuthenticationProvider
+
 
             ---
 
-            TODO:
-            - Spring Security patterns
-              - https://www.youtube.com/watch?v=xEnvAAhMGu4
-              - authenticated by default / secure by default
-              - immutability
-              - composability & final classes
-                - JwtGrantedAuthoritiesConverter
-              - ...?
-              - Least priviledge (401 on "unknown endpoint", priviledged info)
-              - Injection
+            ## Bonus!
 
-            - logging.level.org.springframework.security: TRACE
+            ```java
+            public class RobotAccountFilter extends AuthenticationFilter {
+              // ...
+            }
+            ```
+
+            Notes:
+
+            - On va changer notre RobotAccountFilter pour adhérer aux patterns spring sec
+              - "composability"
+              - découpage en "roles"
+
+            ---
+
+            ## RobotAccountFilter.java
+
+            ```java [9-16|18-22|24-26|3-7]
+            public class RobotAccountFilter extends AuthenticationFilter {
+
+              public RobotAccountFilter(AuthenticationManager authenticationManager) {
+                super(authenticationManager, RobotAccountFilter::convert);
+                super.setFailureHandler(RobotAccountFilter::onFailure);
+                super.setSuccessHandler(RobotAccountFilter::onSuccess);
+              }
+
+              private static Authentication convert(HttpServletRequest request) {
+                if (!Collections.list(request.getHeaderNames()).contains("x-robot-password")) {
+                  return null;
+                }
+
+                String password = request.getHeader("x-robot-password");
+                return RobotAuthentication.authenticationToken(password);
+              }
+
+              private static void onFailure(HttpServletRequest req, HttpServletResponse res, AuthenticationException ex) throws IOException {
+                res.setStatus(HttpStatus.UNAUTHORIZED.value());
+                res.setCharacterEncoding("utf-8");
+                res.getWriter().println("You are not Mr Robot... 🤖");
+              }
+
+              private static void onSuccess(HttpServletRequest req, HttpServletResponse res, Authentication auth) throws IOException {
+                // noop
+              }
+            }
+            ```
+
+            ---
+
+            ## Plan
+
+            1. Démo de base
+            2. Théorie
+                1. Authentication - "domain language"
+                2. Filter - "bloc de base HTTP"
+                3. AuthenticationProviders - "authentifier"
+                4. Configurers - "naviguer dans spring-security"
+                5. Spring Boot Auto-Configuration <!-- .element: class="fragment highlight-blue" -->
+
+            Notes:
+
+            - Enfin...
+              - Spring Boot fait plein de choses, un petit mot pour comment découvrir comment les
+                choses sont auto-câblées
+              - spring-boot-autoconfigure
+                - security, oauth2
           </script>
         </section>
 
@@ -1542,13 +1635,15 @@
       // Also available as an ES module, see:
       // https://revealjs.com/initialization/
       Reveal.initialize({
-        controls: true,
+        controls: false,
         progress: true,
         center: true,
         hash: true,
         width: 1280,
         height: 800,
         transition: 'none',
+        slideNumber: true,
+        center: false,
 
         // Learn about plugins: https://revealjs.com/plugins/
         plugins: [ RevealZoom, RevealNotes, RevealSearch, RevealMarkdown, RevealHighlight ]
