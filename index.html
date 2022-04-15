@@ -1546,9 +1546,149 @@
             - Montrer classe finale (problème pour faire Extends!)
               - InMemoryOAuth2AuthorizedClientService
               - MappedJwtClaimSetConverter
-           - Essayons de faire que 
-           - Montrer OidcAuthorizationCodeAuthenticationProvider
+            - Parler du use-case
+            - Traces:
+              - Montrer OidcAuthorizationCodeAuthenticationProvider
+              - Montrer que c'est configurable
+            - On pourrait faire un custom provider
+            - mais plutôt ObjectPostProcessor
 
+            ---
+
+            ## RateLimitedAuthenticationProvider.java
+
+            ```java
+            public class RateLimitedAuthenticationProvider implements AuthenticationProvider {
+              // ...
+              @Override
+              public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+                // ??
+                var success = renewCacheEntry(parentAuthentication);
+                if (success) {
+                  return parentAuthentication;
+                } else {
+                  throw new BadCredentialsException("Cannot log in right now: rate limited");
+                }
+              }
+            }
+            ```
+
+            Notes:
+
+            - On veut faire la même chose
+            - PLUS! un peu de logique
+            - Pattern du delegate
+
+            ---
+
+            ## RateLimitedAuthenticationProvider.java
+
+            ```java
+            public class RateLimitedAuthenticationProvider implements AuthenticationProvider {
+              private final AuthenticationProvider delegate;
+            
+              public RateLimitedAuthenticationProvider(AuthenticationProvider delegate) {
+                this.delegate = delegate;
+              }
+            
+              @Override
+              public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+                var parentAuthentication = this.delegate.authenticate(authentication);
+                //...
+              }
+            }
+            ```
+
+            Note:
+
+            - Donc on wrappe le truc!
+            - On pourrait en créer un nouveau mais ça poserait le même problème de construction
+
+            ---
+
+            ## RateLimitedAuthenticationProvider.java
+
+            ```java
+            public class RateLimitedAuthenticationProvider implements AuthenticationProvider {
+
+              private final Map<String, Instant> authCache = new HashMap<>();
+            
+              // ...
+
+              synchronized public boolean renewCacheEntry(Authentication authentication) {
+                var now = now();
+                var previousLogin = authCache.get(authentication.getName());
+                if (previousLogin == null || previousLogin.plusSeconds(60).isBefore(now)) {
+                  authCache.put(authentication.getName(), now);
+                  return true;
+                } else {
+                  return false;
+                }
+              }
+            ```
+
+            Note:
+
+            - Pitié ne faites pas ça hin, c'est juste pour montrer un exemple
+              - Pas faire du "vrai" cache
+
+            ---
+
+            ## ...PostProcessor.java
+
+            ```java
+            public class RateLimiteAuthenticationProviderProcessor<T extends AuthenticationProvider> implements ObjectPostProcessor<T> {
+              private Class<T> clazz;
+
+              public RateLimiteAuthenticationProviderProcessor(Class<T> clazz) {
+                this.clazz = clazz;
+              }
+
+              @Override
+              public <O extends T> O postProcess(O object) {
+                if (clazz.isAssignableFrom(object.getClass())) {
+                  return (O) new RateLimitedAuthenticationProvider(object);
+                }
+                return object;
+              }
+            }
+            ```
+
+            Notes:
+
+            - Montrer SecurityConfig .withObjectPostProcessor
+            - Montrer comment ça marche
+            - Créer post-processor avec OidcAuthorizationCodeAuthenticationProvider d''abord
+            - On veut restreindre à ce qui nous intéresse vraiment (secure by default!!)
+             
+            ---
+
+            ## SecurityConfig.java
+
+            ```java
+            @Bean
+            SecurityFilterChain securityFilterChain(/* ... */) {
+              // @formatter:off
+              return http
+                // ... 
+                .and().oauth2Login()
+                  .withObjectPostProcessor(
+                    new RateLimiteAuthenticationProviderProcessor<>(
+                      OidcAuthorizationCodeAuthenticationProvider.class
+                    )
+                  )
+                .and()
+                // ... 
+                .build();
+              // @formatter:on
+            }
+            ```
+
+            Notes:
+
+            - Câbler
+            - Démo
+            - Paramétriser trop compliqué
 
             ---
 
@@ -1621,7 +1761,7 @@
                 - security, oauth2
           </script>
         </section>
-
+      </div>
     </div>
 
     <script src="dist/reveal.js"></script>
