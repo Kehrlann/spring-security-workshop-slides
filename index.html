@@ -125,9 +125,11 @@
               - don't get stuck on StackOverflow
             - ANTI-goal: show you all cool detailed features
               - You wouldn't remember them anyway
-              - Focus on authentication == identity, not so much on authorization
+            - Focus on authentication == identity, not so much on authorization
             - Only Servlet, no WebFlux (reactive)
               - Primitives are slightly different, no expert
+            - Not Spring Security 6.0, although won't change EVERYTHING
+              - Note: the patterns are forward-compatible
             - Caveat: Intermediate level, NOT beginner
               - If you don't know spring, this may hurt
 
@@ -145,8 +147,8 @@
             - gradle
             - java 17 (why not!)
             - Boot 2.7.x
-            - web + devtools
-            - NOT security yet
+            - web
+            - NO dev tools, no security
 
             ---
             
@@ -178,10 +180,9 @@
 
             ## build.gradle
 
-            ```gradle [4]
+            ```gradle [3]
             dependencies {
               implementation 'org.springframework.boot:spring-boot-starter-web'
-              implementation 'org.springframework.boot:spring-boot-devtools'
               implementation 'org.springframework.boot:spring-boot-starter-security'
               testImplementation 'org.springframework.boot:spring-boot-starter-test'
             }
@@ -222,9 +223,9 @@
             Notes:
 
             - SecurityFilterChain
-            - D'abord "/private" .authenticated()
-            - Puis le pattern "correct"
-            - Notez: on ne peut pas se logguer!
+            - First: "/private" .authenticated()
+            - Then correct pattern
+            - Notice: we can't log in!
 
             ---
 
@@ -249,8 +250,8 @@
 
             Notes:
 
-            - Ca réactive le form login de Spring Security
-            - Toujours mot de passe auto-généré
+            - Put login form back in
+            - Still auto-generated password
 
             ---
 
@@ -272,20 +273,19 @@
 
             Notes:
 
-            - On peut créer des @Beans qui font des choses
-            - On trouve ça dans la doc/les guides
-            - CF la doc?
-            - Démo!
-            - On peut aussi ajouter d'autres modules de Spring Security
+            - We can create @Beans that do things
+            - Find it in the guides
+            - CF spring sec doc
+            - Demo
+            - Now we can turn on other spring-sec modules
 
             ---
 
             ## build.gradle
 
-            ```gradle [5]
+            ```gradle [4]
             dependencies {
               implementation 'org.springframework.boot:spring-boot-starter-web'
-              implementation 'org.springframework.boot:spring-boot-devtools'
               implementation 'org.springframework.boot:spring-boot-starter-security'
               implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
               testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -294,11 +294,11 @@
 
             Notes:
 
-            - Login oauth2/open id
-            - Est-ce que vous êtes familiers avec OAuth2? 
-            - On ne va pas parler du protocole en particulier
-            - Mais le combo boot + security permet de juste changer la config
-            - Et activer un nouveau type de login
+            - Login with OAuth2 / OpenID
+            - Are you familiar with OAuth2 ?
+            - We won't describe the protocol in detail
+            - Boot + Security: change the config,
+            - => activate a new login type
             
             ---
 
@@ -324,7 +324,7 @@
 
             Notes:
 
-            - Activer le nouveau type de login
+            - Activate new login
             - Spring Security Pattern: all config in one place!
 
             ---
@@ -344,14 +344,14 @@
 
             Notes:
 
-            - Ajouter google via console.cloud.google.com
+            - Add Google through console.cloud.google.com
             - Search Api Keys, Add new OAuth2 Login
             - redirect url: 
 
             `http://localhost:8080/login/oauth2/code/google`
 
-            - Configurer le client-id/secret
-            - Login: tadaa!
+            - Configure client-id/secret, login: tadaa!
+            - Now, let's USE the authentication data
 
             ---
 
@@ -375,9 +375,10 @@
 
             Notes:
 
-            - On peut injecter l'authentication
+            - Inject the Authentication
               - Spring Security Pattern: injection!
-            - Et afficher le nom
+            - Print the name: for Google, ugly `sub` claim
+            - We can extract the email claim
 
             ---
 
@@ -400,89 +401,90 @@
 
             Notes:
 
-            - maintenant le nom c'est un peu moche via google
-            - c'est un guid dans le cadre de ce serveur
-            - on peut extraire l'e-mail mais c'est touchy...
+            - Touchy though, I have notes
+            - Requires breakpoint + inspecting Authentication
 
             ---
 
-            ## Alors?
+            ## So?
 
-            C'est compliqué, n'est-ce pas? <!-- .element: class="fragment" -->
+            A bit ... complex, isn't it? <!-- .element: class="fragment" -->
             
             Notes:
 
-            - Compliqué n'est-ce pas?
+            - Complicated, innit?
+            - Complex: many threads weaved together
 
             ---
 
             ## Plan
 
-            1. Démo de base
-            2. Théorie
+            1. Demo: a baseline
+            2. Theory
                 1. Authentication - "domain language" <!-- .element: class="fragment highlight-blue" -->
-                2. Filter - "bloc de base HTTP"
-                3. AuthenticationProviders - "authentifier"
-                4. Configurers - "naviguer dans spring-security"
+                2. Filter - "HTTP building block"
+                3. AuthenticationProviders - "to authenticate"
+                4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration
 
             Notes:
 
-            - Le but de la démo ce n'est pas que vous sachiez reproduire
-            - Ni même que vous reteniez
-            - Juste montrer que c'est compliqué
-            - Et donner une base de discussion
+            - Again: I don't expect you to reproduce this after the talk
+            - I don't even expect you to commit this to memory
+            - Just show case that it's powerful BUT complex
+            - Have a substrate to discuss things
 
             ---
 
-            ## Côté "consommateur"
+            ## Consuming Authentication objects
 
-            Spring Security produit des `Authentication`. Celles-ci sont utilisées pour:
-            - Authentification (`authn`): _qui_ est le user?
-            - Authorization (`authz`): est-ce que le user _à le droit de faire_ XYZ?
+            Spring Security produces `Authentication`. They are used for:
+            - Authentification (`authn`): _who_ is the user?
+            - Authorization (`authz`): is the user _allowed to perform_ XYZ?
 
             ---
 
-            ## Un peu de vocabulaire
+            ## Vocabulary
 
-            - **Authentication**: représente l'utilisateur. Contient:
-              - **Principal**: "identité" de l'utilsateur (nom, email...)
+            - **Authentication**: represents the user. Contains:
+              - **Principal**: user "identity" (name, email...)
               - **GrantedAuthorities**: "permissions" (`roles`, ...)
 
-            Plus de détails: https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
+            More details: https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
 
             Notes:
 
-            - Authentication: ce que Spring Sec produit, représente une entité authentifiée
-            - Principal: "qui" est identifié, c'est ce qui vous intéresse le plus
-              - e.g. nom, adresse mail, client_id, etc.
+            - Authentication: what SpringSec produces, an "entity Authenticated", user, machine, ...
+            - Principal: "who" is authenticated, what's most interesting to you
+              - e.g. name, e-mail address, client_id, etc.
             - GrantedAuthorities
-              - souvent la forme "ROLE_admin"
-              - un simple wrapper autour d'une String
-              - On ne verra pas tous les détails ajd, se concentre sur l'identité
+              - Often "ROLE_admin"
+              - Often a wrapper around a simple string
+              - Not our focus today, we are focusing on identity
 
             ---
 
-            ## Un peu de vocabulaire (cont')
+            ## Vocabulary (cont')
 
-            - **Authentication** contient aussi:
-              - **.isAuthenticated()**: presque toujours `true`
-              - **details**: infos supplémentaires sur la _requête_
-              - (Credentials): "password", souvent mis à `null`
+            - **Authentication** also contains:
+              - **.isAuthenticated()**: almost always `true`
+              - **details**: details about the _request_
+              - (Credentials): "password", often `null`
             
-            Plus de détails: https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
+            More details: https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
+
 
             Notes:
 
-            - Moins intéressant
-              - isAuthenticated: true, sinon la requête peut être rejetée
-            - Montrer classe authentication
-            - Notez que Principal est un `Object`
-              - grand thème de la flexibilité spring-security
+            - Less interesting
+              - isAuthenticated: true, Otherwise request is rejected
+            - Show Authentication class
+            - Principal is an `Object`
+              - Spring sec principle: extensibility through objects
 
             ---
 
-            ## Et du coup
+            ## Consequence...
 
             ```java
             @Override
@@ -496,8 +498,8 @@
 
             Notes:
 
-            - Du coup ce n'est pas la lib la plus type-safe du monde
-            - Mais ça permet de s'interfacer avec le monde entier, future-proof
+            - Not the most type-safe lib in the world
+            - But can integrate with whatever you want it to
 
             ---
 
@@ -516,78 +518,78 @@
             Notes:
 
             - extends Principal: java.security.Principal
-            - Je vous encourage à travailler exclusivement avec des objets Spring Security
+            - Only ever use Spring-Security objects
               - Don't: public String foo(Principal principal)
               - Do: foo(Authentication auth)
-            - getPrincipal: `Object` comme ça super extensible
-              - Très, très, très confusant
-              - Exemple: UserDetails dans UsernamePasswordAuthenticationToken
-              - Comment trouver? Debugger le plus simple.
-              - Montrer.
+            - getPrincipal: `Object` -> extensibility
+              - Very, very confusing
+              - Example: UserDetails in UsernamePasswordAuthenticationToken
+              - How to find out? Breakpoints!
+              - Demo it with Google log in
             
             ---
 
-            ## Pour vos applis
+            ## For your own apps
 
             - **DO**:
-              - Créer vos propres sous-classes `Authentication`
+              - Create your own `Authentication` subclasses
             - **DON'T**:
-              - Utiliser `UsernamePasswordAuthenticationToken` partout 
+              - Use `UsernamePasswordAuthenticationToken` everywhere 
 
             Notes:
 
-            - Même dans les tests! TestingAuthenticationToken, etc
+            - Even in tests! TestingAuthenticationToken, etc
 
             ---
 
-            ## Le tout dans un SecurityContext
+            ## Wrapped in a SecurityContext
 
-            - Thread-local, non propagé passé aux threads enfants
-            - Nettoyé quand la requête est traitée à 100%
+            - Thread-local, not propagated to child threads
+            - Cleared after requests is 100% processed
 
             Notes:
 
-            - Montrer SecurityContextHolder.getSecurityContext().getAuthentication()
-              - Pratique si vous ne voulez pas cascader
-            - Montrer new Thread(...).start()
-            - Pratique si nesté!
-              - Montrer un FooService
-              - Montrer @PreAuthorize()
+            - Show SecurityContextHolder.getSecurityContext().getAuthentication()
+              - Useful to allow passing authentications down the stack
+              - Show a fake FooService
+              - Show @PreAuthorize()
+            - Show new Thread(...).start()
             - Spring Security Pattern: all config in one place ...
               - ... but defense-in-depth!
+            - Talk about SecurityContextPersistenceFilter
 
             ---
 
-            ## Récapitulatif
+            ## Recap
 
             <img src="images/securitycontextholder.png" height="200px">
 
             Notes:
 
-            - Simple pour l'utilisation
+            - Easy to use
             - SecurityContextHolder -> SecurityContext
-            - Objet qui nous intéresse, une Authentication
-              - Avec un Principal (identité) et GrantedAuthorities ("permissions")
+            - What we care about is an Authentication object
+              - With a Principal (identity) and GrantedAuthorities ("permissions")
 
             ---
 
             ## Plan
 
-            1. Démo de base
-            2. Théorie
+            1. Demo: a baseline
+            2. Theory
                 1. Authentication - "domain language"
-                2. Filter - "bloc de base HTTP" <!-- .element: class="fragment highlight-blue" -->
-                3. AuthenticationProviders - "authentifier"
-                4. Configurers - "naviguer dans spring-security"
+                2. Filter - "HTTP building block" <!-- .element: class="fragment highlight-blue" -->
+                3. AuthenticationProviders - "to authenticate"
+                4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration
 
             Notes:
 
-            - On a vu Authentication, et comment utiliser ce que Spring Security produit
-              - Pas le coeur de cette présentation
-              - Mais important de parler de que c'est
-            - Maintenant voyons un peu comment Spring Secrity produit des authentifications!
-            - Spring Security ca securise des endpoints HTTP
+            - We've seen Authentication, and how to use what Spring Sec producdes
+              - Not the heart of our presentation
+              - Important to mention it though, as it's core
+            - Now, let's see HOW spring sec produces authentications
+            - Spring Security is for securing HTTP endpoints
 
             ---
 
@@ -968,14 +970,13 @@
 
             ## Plan
 
-            1. Démo de base
-            2. Théorie
+            1. Demo: a baseline
+            2. Theory
                 1. Authentication - "domain language"
-                2. Filter - "bloc de base HTTP"
-                3. AuthenticationProviders - "authentifier" <!-- .element: class="fragment highlight-blue" -->
-                4. Configurers - "naviguer dans spring-security"
+                2. Filter - "HTTP building block"
+                3. AuthenticationProviders - "to authenticate" <!-- .element: class="fragment highlight-blue" -->
+                4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration
-            
 
             Notes:
 
@@ -1354,12 +1355,12 @@
 
             ## Plan
 
-            1. Démo de base
-            2. Théorie
+            1. Demo: a baseline
+            2. Theory
                 1. Authentication - "domain language"
-                2. Filter - "bloc de base HTTP"
-                3. AuthenticationProviders - "authentifier"
-                4. Configurers - "naviguer dans spring-security" <!-- .element: class="fragment highlight-blue" -->
+                2. Filter - "HTTP building block"
+                3. AuthenticationProviders - "to authenticate"
+                4. Configurers - "navigate Spring Security" <!-- .element: class="fragment highlight-blue" -->
                 5. Spring Boot Auto-Configuration
 
             Notes:
@@ -1752,12 +1753,12 @@
 
             ## Plan
 
-            1. Démo de base
-            2. Théorie
+            1. Demo: a baseline
+            2. Theory
                 1. Authentication - "domain language"
-                2. Filter - "bloc de base HTTP"
-                3. AuthenticationProviders - "authentifier"
-                4. Configurers - "naviguer dans spring-security"
+                2. Filter - "HTTP building block"
+                3. AuthenticationProviders - "to authenticate"
+                4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration <!-- .element: class="fragment highlight-blue" -->
 
             Notes:
@@ -1809,7 +1810,7 @@
         center: true,
         hash: true,
         width: 1280,
-        height: 800,
+        height: 720,
         transition: 'none',
         slideNumber: true,
         center: false,
