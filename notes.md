@@ -3,7 +3,16 @@
 This file captures "work in progress" notes.
 
 
-## Summary
+## Devoxx BE 2022
+
+- Q: AntMatchers? Mutliple filter chains?
+- Notice: devtools keeps sessions alive across restarts
+
+---
+
+## Devoxx FR 2022
+
+### Summary
 
 0. Intro / me
 1. Simple demo: how to _use_ Spring Security (one app, two endpoints, secure
@@ -34,6 +43,7 @@ This file captures "work in progress" notes.
   - Custom Configurer
 6. Spring Boot autoconfigurer
 
+---
 
 ## Reference
 
@@ -44,6 +54,7 @@ This file captures "work in progress" notes.
 - [Servlet architecture](https://docs.spring.io/spring-security/reference/servlet/architecture.html)
 - [Authentication architecture](https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html)
 
+---
 
 ## Parking lot / ideas
 

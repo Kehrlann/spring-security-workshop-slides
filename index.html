@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>Spring Security - Décodage et démystification 🕵️</title>
+		<title>Spring Security - Demystified 🕵️</title>
 
 		<meta name="description" content="...">
 		<meta name="author" content="Daniel Garnier-Moiroux">
@@ -69,11 +69,11 @@
         <section data-markdown data-background-image="images/fond_ecran_1080.png"
           data-background-size="contain">
           <script type="text/template">
-            ## Spring Security - Décodage et démystification 🕵️
+            ## Spring Security - Demystified 🕵️
 
             <img src="images/profile_picture.jpeg" height="200px" style="border-radius: 50%;">
 
-            Devoxx FR - 2022/04/20
+            Devoxx - 2022/10/11
 
             Daniel Garnier-Moiroux
 
@@ -85,7 +85,7 @@
 
             <img src="images/profile_picture.jpeg" height="200px" style="border-radius: 50%;">
 
-            Software Engineer @ VMware (Spring Commercial)
+            Software Engineer @ VMware (Tanzu Spring)
 
             https://garnier.wf/
 
@@ -96,40 +96,40 @@
 
             
             Notes:
-            C'est moi! Trouvez moi sur internet.
+            That's me. Find me on the internet.
 
-            Je bosse chez VMware, dans les équipes Spring Commercial.
+            I work at VMware, Tanzu Spring
 
-            Je contribue à Spring Security.
+            Spring Security contributor
 
-            Aussi, prof d'informatique pour les élèves de 1ere anné en école d'ingé.
+            Teach CS to engineering students at Mines Paris
 
             ---
 
             ## Plan
 
-            1. Démo de base <!-- .element: class="fragment highlight-blue" -->
-            2. Théorie
+            1. Demo: a baseline <!-- .element: class="fragment highlight-blue" -->
+            2. Theory
                 1. Authentication - "domain language"
-                2. Filter - "bloc de base HTTP"
-                3. AuthenticationProviders - "authentifier"
-                4. Configurers - "naviguer dans spring-security"
+                2. Filter - "HTTP building block"
+                3. AuthenticationProviders - "to authenticate"
+                4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration
             
 
             Notes:
 
-            - On va parler de beaucoup de choses, c'est très dense.
-            - Le but de la présentation: votre autonomie
-              - naviguer seuls dans spring-security
-              - pas coincés sur StackOverflow à ne rien comprendre
-            - PAS LE BUT: vous montrer plein de features que vous ne retiendrez pas
-              - On va rester très concentrés sur l'authentification, l'identité
-              - Pas beaucoup parler d'authorization, la "permission"
-            - Aussi: on va faire que du Servlet, pas du Réactif
-              - C'est un peu différent et je ne suis pas un expert
-            - Caveat: niveau intermédiaire, pas débutant
-              - Si vous n'avez jamais vu Spring, oups
+            - We will cover a LOT of things, dense
+            - Goal: make you autonomous on spring-sec
+              - navigate spring-sec on your own
+              - don't get stuck on StackOverflow
+            - ANTI-goal: show you all cool detailed features
+              - You wouldn't remember them anyway
+              - Focus on authentication == identity, not so much on authorization
+            - Only Servlet, no WebFlux (reactive)
+              - Primitives are slightly different, no expert
+            - Caveat: Intermediate level, NOT beginner
+              - If you don't know spring, this may hurt
 
             ---
 
@@ -143,8 +143,8 @@
 
             - start.spring.io
             - gradle
-            - java 11 
-            - Boot 2.6.x
+            - java 17 (why not!)
+            - Boot 2.7.x
             - web + devtools
             - NOT security yet
 
@@ -171,8 +171,8 @@
 
             Notes:
 
-            - Spring Boot classique, une page publique + une privée
-            - Montrer dans le browser
+            - Classic Spring Boot, two pages, public and private
+            - Show in browser
 
             ---
 
@@ -189,12 +189,13 @@
 
             Notes:
 
-            - Ajouter Spring Security
-            - Montrer dans le browser
-            - Montrer les logs
-            - Montrer SecurityAutoConfiguration
+            - Add Spring Security
+            - Show in browser
+            - Show logs
+            - Show SecurityAutoConfiguration
             - SPRINGSEC PATTERN: secure by default
-              - Faites pareil!
+              - show 403 everywhere
+              - Do the same in your apps!
 
             ---
 
