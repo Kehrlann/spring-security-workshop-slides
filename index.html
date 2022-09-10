@@ -598,13 +598,14 @@
             <img src="images/filterchain.png" height="500px">
 
             Notes:
-            - Ca c'est l'archi Servlet, pas juste spring sec
-            - Chaque élément (filtre + servlet) a accès aux objets requete et réponse
-            - Un client envoie une requête, le container servlet crée une chaîne de filtres,
-              exécutés dans l'ordre, puis la servlet qui doit traiter la réponse
+            - This is the java Servlet architecture, not just Spring Security
+            - Every element (filter + servlet) can access Request and Response objects
+            - A client sends and HTTP request, the servlet container executes a filter chain, in
+              order, and the the Servlet which produces the content
+              - Servlet container: Tomcat, Jetty, JBoss, WebLogic,...
             - Filters == "pre-processing"
-              - Soit couper la connection + écrire la réponse (think: CSRF)
-              - Soit modifier la Requête ou la Réponse, ou "le contexte 
+              - Either cut further processing and write an error to the response (think: CSRF)
+              - Or modify the Request, response, or the global context in which those are exectued
 
             ---
 
@@ -614,9 +615,9 @@
 
             Notes:
 
-            - Spring apporte ses propres abstractions pour câbler des Filtres
-            - (Lifecycle différent: les filtres doivent être créés à la création du container,
-            différent du lifecycle de l'application contenxt spring)
+            - Spring has its own abstractions for wiring in Filters
+            - (Because the Spring lifecycle is different from the container's: the filters must be
+              registered when creating the container, whereas Spring wires things later)
 
             ---
 
@@ -626,7 +627,8 @@
 
             Notes:
 
-            - Et Spring Security aussi ..., tout ca, ca descend
+            - Then Spring Securiyt has its own abstractions
+            - Turtles all the way down (or at least abstractions)
 
             ---
 
@@ -635,14 +637,15 @@
             <img src="images/securityfilterchain.png" height="500px">
 
             Notes:
-
-            - Ca descend, jusqu'à ce qui nous intéresse... la SecurityFilterChain
-            - C'est un peu plus subtil mais on va en rester là
-            - (En fait, il peut y avoir plusieurs SecurityFilterChains, managées par le
-            FilterChainProxy, protégeant chacun un "path" différent avec des filtres différents)
-            - La SecurityFilterChain c'est comme une filter chain normale, mais avec quelques
-            fonctionnalités par défaut en plus ; et c'est un point d'entrée dans Spring Security
-            - Montrer: breakpoint dans DefaultSecurityFilterChain constructeur
+            - All the way down, until we find the important piece: the SecurityFilterChain
+            - Sligtly more subtle than this:
+              - You can have _multiple_ SecurityFilterChains, managed by the FilterChainProxy
+              - Each SecurityFilterChain protects an HTTP path with different filters
+              - For the sake of the example, we assume one SecFilterChain
+            - SecurityFilterChain is a "normal" or "regular" FilterChain, with small additions, and
+              it's the entrypoint to Spring Security
+              - Everything you declare in spring sec will be there
+            - SHOW: breakpoint in DefaultSecurityFilterChain
 
             ---
 
@@ -653,21 +656,24 @@
               HttpServletRequest request, 
               HttpServletResponse response, 
               FilterChain chain) {
-                // 1. Avant de continuer (e.g. authentication)
+                // 1. Before the request proceeds further (e.g. authentication or reject req)
                 // ...
 
-                // 2. Invocation de "la suite"
+                // 2. Invoke the "rest" of the chain
                 chain.doFilter(request, response);
 
-                // 3. Une fois que la requête a été gérée
+                // 3. Once the request has been fully processed (e.g. cleanup)
                 // ...
             }
             ```
 
             Notes:
 
-            - Dans une classe `Filter` ça ressemble à ça
-            - Ça veut dire que chaque filter appelle "la suite", c'est pas une boucle for
+            - That's a filter
+            - Describe the actions
+            - Usually only 1 and 2 ; example of 3: SecurityContextPersistenceFilter
+            - See how each filter calls the filter chain back? That's not a loop
+              - It's based on the chain-of-responsibility pattern
 
             ---
 
@@ -677,8 +683,8 @@
 
             Notes:
 
-            - En représentant un peu les objets, ça donne ça
-            - Expliquer
+            - A simplified view of this
+            - Explain
 
             ---
 
@@ -688,8 +694,8 @@
 
             Notes:
 
-            - Donc si on représente le diagramme précédent sous forme de call stack...
-            - Donc si il y a une exception dans le filtre3, elle peut être attrapée par le fitlre2
+            - If we do a call stack of the previous diagram, it looks like this
+            - Interesting: an exception in Filter 3 can be caught by Filter 2
   
             ---
 
@@ -699,29 +705,31 @@
 
             Notes:
 
-            - En pratique, ça donne des stack traces un peu compliquées...
+            - This is why the stack trace is somewhat hard to follow
+            - We'll come back to this
 
             ---
 
-            ## ... respirez 🧘 ...
+            ## ... Take a deep breath 🧘 ...
 
             <img src="images/kitten.gif" height="500px">
 
             Notes:
             
-            - Promis on en sort doucement
-            - Respirez, profitez, étirez-vous
+            - I promise, we're almost done with the big chunck of theory
+            - We're going to get coding
+            - Take a deep breath, stretch
 
             ---
 
-            ## ... respirez 🧘 ...
+            ## ... Take a deep breath 🧘 ...
 
             <img src="images/puppy.gif" height="500px">
 
             Notes:
             
-            - Il n'y en a pas que pour les chats
-            - On va faire du code! Allez!
+            - There's no reason only kitten lovers get their share of gifs, so here are some puppies
+            - Alright, let's code! Let's go!
 
             ---
 
@@ -732,22 +740,21 @@
               HttpServletRequest request, 
               HttpServletResponse response, 
               FilterChain chain) {
-                // 1. Avant de continuer (e.g. authentication)
+                // 1. Before the request proceeds further (e.g. authentication or reject req)
                 // ...
 
-                // 2. Invocation de "la suite"
+                // 2. Invoke the "rest" of the chain
                 chain.doFilter(request, response);
 
-                // 3. Une fois que la requête a été gérée
+                // 3. Once the request has been fully processed (e.g. cleanup)
                 // ...
             }
             ```
 
             Notes:
 
-            - Vous vous rappelez?
-            - Implémentons notre propre Filter...
-
+            - Remember this?
+            - Let's see this in practice!
 
             ---
 
@@ -768,13 +775,16 @@
 
             Notes:
 
-            - Commencer par implements Filter, mais ça c'est du javax.servlet
-            - Je vous ai recommandé de n'utiliser que des classes Security
-              - en plus, si vous faites filter, faut se poser la question des métodes lifecycle...
-              - au moins GenericFilterBean, spring-web, pas de questions
-              - mieux: OncePerRequestFilter - le nom est assez éloquent
-            - On va juste faire un log
-            - Pour l'instant jamais exécuté, faire un curl pour montrer
+            - Start by implementing Filter (javax.servlet)
+            - Explain the use-case
+            - I recommended using Spring Security classes only
+              - If you go with javax.servlet, you have to think about the lifecycle
+              - So, at least, use a Spring-Web GenericFilterBean
+              - There are useful sub-implementations
+              - Show diagram, then show descendants, layout = radial.radial
+              - the most used child impl: OncePerRequestFilter - it's all in the name
+            - Alright so let's start with a log
+            - This is _never_ exectued, if we curl we will see it's not in there
 
             ---
 
@@ -800,9 +810,12 @@
 
             Notes:
 
-            - Il faut qu'on le mette quelque part dans la chaîne
-            - On sait qu'on a un UsernamePasswordAuthenticationFilter
-            - Montrer dans le browser, expliquer pourquoi ça apparaît 2 fois
+            - We need to add it somewhere in the filter chain!
+            - .addFilterBefore
+            - _Where_ is a more advanced topic, if you're performing authentication, it could be
+              before any AbstractAuthenticationFilter, or in our case
+              UsernamePasswordAuthenticationFilter
+            - Show in the browser. Explain why the log happens twice.
 
             ---
 
@@ -827,12 +840,14 @@
             ```
 
             Notes:
-            - On va lire un header
-            - Si le header a la bonne valeur, on va mettre une authentification
-              - PAS UsernamePasswordAuthenticationToken!! Montrer ce qu'on pourrait mettre dedans.
-              - Pour l'instant, créer la classe mais vide
-            - On la set dans le context holder, et chain.doFilter()
-            - Sinon, on ne fait rien
+            - So let's read a header
+            - If it has the correct value, create an authentication
+              - NOT UsernamePasswordAuthenticationToken - show what would be required
+              - For now, create an empty class RobotAuthentication
+            - Set the authentication in the context holder
+              - What else do we need to do?
+              - Anyone remembers? call chain.doFilter()
+            - If incorrect, return UNAUTHORIZED and close the response
 
             ---
 
@@ -858,14 +873,14 @@
 
             Notes:
 
-            - Authentication minimale
-            - Toujours authentifiée, nom hardcodé
-              - Spring Security Pattern: immutability, pas de "setAuthenticated"
-              - Possible mais pas recommandé (retrocompatibilité)
-            - curl vers "private" avec le header -> ça fonctionne !
-            - montrer avec un breakpoint
-            - montrer que browser vers /private c'est pété 401
-            - (Optionel, parler du role)
+            - Minimal auth
+            - Always authenticated, hardcoded name
+              - Spring Security Pattern: immutability, do not allow "setAuthenticated"
+              - Possible but not recommended, mostly here for backward-compatibility
+            - curl to "/private" with the header -> It Works™™
+            - Show with a breakpoint
+            - Go to /private in the browser: broken
+            - (opt: talk about the role)
 
             ---
 
@@ -886,36 +901,39 @@
 
             Notes:
 
-            - Vérifier que le header est présent, sinon continuer sans authent'
-            - Le filtre dit "cette requête ne me regarde pas"
-            - COOL! Recap.
+            - Let's check our filter again: if the header is NOT present, 401
+            - Start by checking whether you should try authenticating this request, is the header
+              present?
+              - If not, filter says "not my responsibility"
+            - Try both again.
+            - COOL! It works. Let's recap.
 
             ---
 
-            ## Récap!
+            ## Recap!
 
-            1. Créer un `Filter`: décision d'authentification
-              1. Prend une HttpServletRequest, HttpServletResponse
-              2. Lis et écris
-            2. Créer une `Authentication`: résultat d'authentification
-              1. Une classe qui a du sens, pas `UsernamePassword...`
-            3. Activer le `Filter` dans la `SecurityFilterChain`
-
+            1. Create a `Filter`: make an Authentication decision
+              1. Takes HttpServletRequest, HttpServletResponse in
+              2. Reads from request, (sometimes) writes to Response
+            2. Create an `Authentication`: the result of the auth process
+              1. A _meaningful_ class, not `UsernamePassword...`
+            3. Register the `Filter` in the `SecurityFilterChain`
 
             Notes:
 
-            - Le cas qu'on a montré == vrai cas, si vous avez besoin d'un accès API-only
-            - Bon avec de la _vraie_ sécurité, pas un truc hardcodé comme on a fait
+            - That's a real-world use-case, say you need API-only access
+            - But if you do it, do it with proper security
+              - And maybe use existing protocols, e.g. OAuth with client_credentials
 
             ---
 
-            ## Un "vrai" exemple
+            ## A "real" example
 
             `CsrfFilter.java`
 
             Notes:
 
-            - Qui connaît le principe de CSRF, Cross Site Request Forgery?
+            - Who doesn't know how Cross-Site Request Forgery works?
 
             ---
 
@@ -925,12 +943,18 @@
 
             Notes:
 
-            - Attaque maintenant moins courante avec les nouvelles protections de cookies
-            - Idée: se connecter légitimement sur un site (ici: bank)
-            - Un site malicieux a un bouton qui fait un "POST" vers une page du vrai site
-            - Le browser utilise vos cookies pour faire passer la requête comme si elle venait du
-              site principal (ici: bank)
-            
+            - Browsers are being stricter with cookies so harder to pull this one off
+            - Idea:
+              - user connects to a website, legit authentication
+              - user browsers to malicious site
+              - there is a button the malicious site that does a POST request to the legit site
+                - e.g. "transfer X monies to this address"
+              - browser uses the cookies of the legit authentication to send the POST
+              - ouch
+            - Used that in the internal "social network" pages of my engineering school, back in the
+              days - I had an HTML form, with all "hidden" fields, and a "click me button", rewrote
+              the user's profile
+
             ---
 
             ## Protection
