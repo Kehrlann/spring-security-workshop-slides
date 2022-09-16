@@ -129,7 +129,7 @@
             - Only Servlet, no WebFlux (reactive)
               - Primitives are slightly different, no expert
             - Not Spring Security 6.0, although won't change EVERYTHING
-              - Note: the patterns are forward-compatible
+              - The patterns are forward-compatible
             - Caveat: Intermediate level, NOT beginner
               - If you don't know spring, this may hurt
 
@@ -965,25 +965,27 @@
             
             Notes:
 
-            - Idée, générer un token à chaque requête, stocké dans la session
-            - Partager ce token dans tous les forms générés
+            - Every time a form is generated, create a token
+              - Store it in the session
+              - set as a hidden field in the form
+            - When a POST is made, tokens must match
 
             ---
 
-            ## Un "vrai" exemple
+            ## A "real" example
 
             Spring Security: `CsrfFilter.java`
 
             Notes:
 
-            - Montrer le code
-            - Notez: on ne peut pas _vraiment_ étendre Spring Security pour ses propres use-cases
-              sans comprendre les concepts / protocoles sous-jacents
-              - Ex: OAuth2 Login...
+            - Show the code
+            - Notice: You can't extend spring-sec for your own needs UNLESS you understand the
+              security domain you are working with (concepts, protocols, ...)
+              - Ex: OAuth2 Login, if you don't understand OAuth
 
             ---
 
-            ## Et les autres Filters?
+            ## And all the other filters?!
 
             ```yaml
             logging.level:
@@ -1004,29 +1006,32 @@
 
             Notes:
 
-            - Avec CSRF-Filter, on montre un filtre qui bloque
-            - Avec RobotAccountFilter, on montre un filte qui authentifie
-            - On pourrait aussi faire des filtres qui écrivent dans la réponse (à la place des
-              endpoints Spring MVC par exemple)
-            - Mais on va creuser les sujets d'authentification plutôt
+            - With CSRF-Filter, show a filter that:
+              - Blocks on "not allowed"
+              - (and also has side-effects)
+            - With RobotAccountFilter, show a filter that does Authentication
+            - We could also show Filters that write the response (instead of MVC endpoints)
+              - Used in Spring Authorization Server, when issuing tokens
+              - But you already get the gist of it
+            - Let's dig more into authentication topics
 
-            
             ---
 
             ## Authentication
 
-            A propos des `Authentication`s... J'ai ~menti~ simplifié un peu.
+            About those `Authentication`s... I may have ~lied~ oversimplified a bit.
 
             🤫
 
             Notes:
 
-            - Vous vous rappelez quand j'ai parlé d'Authentication au début?
-            - J'ai dit que ça représentait quelqu'un d'authentifié...
-            - En fait ça peut aussi représenter un "Token" à authentifier
-            - Qui contient des credentials, ensuite il y a un truc qui décide si les credentials
-              sont valides ou non, traite l'authent', et en renvoie une autre
-            - D'où les credentials qui sont null et "authenticated" == true
+            - remember when I talked about Authentication in the beginning
+            - I said "it represents an authenticated entity"
+            - Actually, it also represents a Token, a bundle of data, to authenticate
+            - Token contains credentials, then something decides whether those creds are valid or
+              not, process the Authentication object and return a new Authentication
+            - Only when this process has gone through do the credentials become null, and
+              authenticated == true
 
             ---
 
@@ -1036,12 +1041,15 @@
 
             Notes:
 
-            - Ce qui rentre, authenticated == false, credentials != null
-            - Ce qui sort, authenticated == true, credentials == null
-            - Exemple dans UsernamePasswordAuthenticationFilter#attemptAuthentication, breakpoint
-            - Montrer la classe AuthenticationManager
-            - Type X qui rentre, souvent type X qui ressort, mais avec #authenticated() == true
-              - Ça peut renvoyer null s'il ne sait pas quoi faire, (e.g. user n'existe pas)
+            - Input has a
+
+            - Input has authenticated == false, credentials != null
+            - Output has authenticated == true, credentials == null
+            - Example in UsernamePasswordAuthenticationFilter#attemptAuthentication, breakpoint
+            - Show AuthenticationManager
+            - Most always, input is of type X, output is also of type X, but #authenticated() == true 
+              - Or null (I don't know how to deal with this)
+              - Or exception (Stop trying to authenticate)
 
             ---
 

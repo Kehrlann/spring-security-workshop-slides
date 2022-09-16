@@ -6,6 +6,7 @@ This file captures "work in progress" notes.
 ## Devoxx BE 2022
 
 - Q: AntMatchers? Mutliple filter chains?
+- Q: csrf filters, how often does it regenerate a token?
 - Notice: devtools keeps sessions alive across restarts
 
 ---
