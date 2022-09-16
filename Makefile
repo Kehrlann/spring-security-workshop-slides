@@ -26,6 +26,11 @@ reveal.js: highlight.js
 	@echo "🔨 Linking highlight.js..."
 	@cp highlight.js/build/styles/*.css reveal.js/plugin/highlight
 
+.PHONY: clean
+clean:
+	@rm -rf reveal.js || true
+	@rm -rf highlight.js || true
+
 .PHONY: install
 install: reveal.js highlight.js
 
