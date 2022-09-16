@@ -8,6 +8,8 @@ This file captures "work in progress" notes.
 - Q: AntMatchers? Mutliple filter chains?
 - Q: csrf filters, how often does it regenerate a token?
 - Notice: devtools keeps sessions alive across restarts
+- AuthenticationProvider slide: Authentication / null / AuthenticationException
+- Try Spring-Sec M7 or RC1 when it comes out
 
 ---
 

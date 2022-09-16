@@ -1053,17 +1053,17 @@
 
             ---
 
-            ## ProviderManager et AuthenticationProvider
+            ## ProviderManager and AuthenticationProvider
 
 
             <img src="images/providermanager.png" height="500px">
 
             Notes:
 
-            - Implémentation courante
-            - Permet de rajouter ses propres pour gérer certains types d'authentification
-            - Et ça fait des trucs bonus, genre gérer les credentials, publier des événements
-            - Nous on va plutôt implémenter des authentication-provider
+            - Spring-Security reference implementation
+            - Add your own AuthenticationProviders for authenticating tokens
+            - Has built-in behavior: clean up credentials, publish events, etc.
+            - Usual entry point into Spring Sec: custom AuthenticationProviders
 
             ---
 
@@ -1074,11 +1074,11 @@
 
             Notes:
 
-            - A savoir, il peut y avoir des hierarchies
-            - Donc si le ProviderManager n'arrive pas à authentifier, il demande à son parent
-              d'authentifier, et ainsi de suite.
-            - Souvent utilisé pour un auth manager "global"
-            - Mais c'est juste une petite note, pas crucial pour ce qu'on veut montrer
+            - Good to know: Hierarchies
+            - If provider manager can't authenticate, delegates to its parent, and so on
+              - useful for "global" authentication managers
+            - Just a small note, not core to what we want to show - but helps debug!
+            - Show the example of the UserDetailsService: breakpoint in ProviderManager#new
             
             ---
 
@@ -1096,15 +1096,15 @@
 
             Notes:
 
-            - Donc, je disais, nous on va faire des AuthenticationProvider
-            - Très simple, ça dit: 
-              - est-ce que je supporte ce type d'authentification?
-              - voilà comment authentifier
-              - Trois possibilités de retour: authentication (authentifié), null (pas de
-                décision,déléguer à quelqu'un d'autre), AuthenticationException (STOP! ne pas
-                authentifier, e.g. "compte bloqué")
-            - Implémentons un exemple
-
+            - I was saying: let's make an AuthenticationProvider! (show interface)
+            - Quite simple, two methods:
+              - do I support this Authentication type (or class)?
+              - Here's how you authenticate
+              - remember, thre possibilities:
+                - authentication: authenticated
+                - null: don't know what to do, delegate to following
+                - exception: STOP! don't authenticate, e.g. "blocked account"
+            - Let's implement an example
 
             ---
 
@@ -1134,14 +1134,13 @@
 
             Notes:
 
-            - Daniel a TOUJOURS le droit de s'authentifier. Et en plus, il a tendance à oublier son
-              password donc on l'autorise à se connecter avec n'importe quel pw
-            - On crée notre AuthProvider qui supporte UsernamePasswordAuthenticationProvider
-            - Supports UsernameAuthenticationToken par exemple (donc pas utilisé sur Oauth), mais
-              on pourrait accepter n'importe quoi en vrai
-            - En général si c'est X en entrée on fait X en sortie, donc respectons le contrat
-              implicite
-            - On renvoie authentifié si jamais name == "daniel", avec role -> admin (pourquoi pas?!)
+            - Daniel is nice. But has really really poor memory.
+            - Daniel can ALWAYS authenticate - and we don't really care about the password.
+            - Create an AuthProvider, supporting UsernamePassworAuthenticationProvider
+            - Support UsernameAuthenticationToken for example (not used on OAuth!), but we could
+              accept anything
+            - Usually, input = X -> output = X, let's respect that contract
+            - Be authenticated if name == "daniel", and set role == admin (eh, why not?)
 
             ---
 
@@ -1167,11 +1166,11 @@
 
             Notes:
 
-            - On le cable dans la filter-chain
-            - montrer dans le browser
-            - comme ça supporte UsernamePasswordAuthenticationToken, tout ce qui produit cette
-              classe est supporté
-            - Par exemple: httpBasic()
+            - Register it in the filter-chain
+            - show in the browser
+            - as it supports UsernamePasswordAuthenticationToken, anything producing that is
+              supported
+            - For example: httpBasic()
 
             ---
 
@@ -1190,13 +1189,12 @@
 
             Notes:
 
-            - J'ai dit que le ProviderManager faisait des trucs bonus
-            - Par exemple, publier des événements
-            - Pour l'instant il faut câblere l'event publisher à la main, c'est de la plomberie qui
-              n'est pas tout à fait solidifiée en attendn spring-sec 6.0.
-              - Je pense que ça sera automatique avec Spring 6.0
-            - AuthEventPublisher c'est un Bean créé par Spring Boot dans ce cas.
-            - Qui émet des événements de login  
+            - I said ProviderManager does additional stuff, e.g. logs!
+            - For example, publish events
+            - In this configuration style, need to wire up event publisher manually
+              - Fixed in 6.0.0 when it comes out, automatically created
+            - AuthEventPublisher is created by Boot
+            - Now the AuthenticationManager emits authentication events
 
             ---
 
@@ -1219,8 +1217,8 @@
 
             Notes:
 
-            - On peut consommer les événements, pas de plomberie particulière à faire
-            - Montrer login user, login password
+            - Which we can listen to and consume
+            - Show login with `user`, login with `daniel`
 
             ---
 
@@ -1265,8 +1263,8 @@
 
             Notes:
 
-            - On peut transformer notre truc de Robot pour ressembler plus à Spring Security
-            - Deux méthodes statiques pour en créer un
+            - So let's evolve our Robot authentication to meet Spring Security "standards"
+            - Let's do two static methods for clarity
               - Spring Security Pattern: immutability!
 
             ---
