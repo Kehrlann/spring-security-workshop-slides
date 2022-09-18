@@ -106,7 +106,7 @@
 
             ---
 
-            ## Plan
+            ## Contents
 
             1. Demo: a baseline <!-- .element: class="fragment highlight-blue" -->
             2. Theory
@@ -417,7 +417,7 @@
 
             ---
 
-            ## Plan
+            ## Contents
 
             1. Demo: a baseline
             2. Theory
@@ -573,7 +573,7 @@
 
             ---
 
-            ## Plan
+            ## Contents
 
             1. Demo: a baseline
             2. Theory
@@ -994,7 +994,7 @@
 
             ---
 
-            ## Plan
+            ## Contents
 
             1. Demo: a baseline
             2. Theory
@@ -1301,9 +1301,9 @@
 
             Notes:
 
-            - Donc si vous avez bien suivi, on va faire quoi là?
-              - Oui, un authentication provider!
-            - Disons qu'on va le rendre un peu flex, avec plusieurs mots de passe configurables
+            - Have you been paying attention, what should be doing here?
+              - Yes, an authentication provider!
+            - Let's make it a bit more flexible, with multiple auth passwords
 
             ---
 
@@ -1339,9 +1339,9 @@
 
             Notes:
 
-            - On modifie le Robot Account Filter pour utiliser un authentication manager
-            - On peut abstraire la conversion "Request -> Authentication(Token)"
-            - Ensuite on authentifie avec le manager et on met un try-catch autour
+            - Change the RobotAccountFilter to use an AuthenticationManager
+            - We could make abstract away the conversion between Request and AuthenticationToken
+            - Then we use the AuthManager, and wrap this in a try-catch for nicer failures
 
             ---
 
@@ -1367,23 +1367,25 @@
 
             Notes:
 
-            - On câble dans la FilterChain
-            - Notez qu'on utilise un provider manager à la main, bof bof
-              - Mais ça ira pour l'instant!
-            - Montrer le curl qui fonctionne + les events dans la console
+            - Wire everything up in the filterchain
+            - Note that we create a ProviderManager before, not great
+              - We should reuse the one from the filter chain
+              - Good enough for now, we'll see later
+            - Show that curl works, and show console authentication events
 
             ---
 
-            ## Récapitulatif!
+            ## Recap!
 
-            1. Les `Authentication`s sont des tokens à _essayer_ d'authentifier ET des
-            authentifications réussies.
-            2. La transformation se passe dans un `AuthenticationProvider`
-            3. C'est là que vous pouvez créer vos propres règles
+            1. `Authentication`s are a sets of credentials for authentication AND the
+            output of successful authentication.
+            2. Transforming credentials into authentication happens in `AuthenticationProviders`
+            3. That's where you should create your own authentication rules
+              - with caveats, of course
 
             ---
 
-            ## Plan
+            ## Contents
 
             1. Demo: a baseline
             2. Theory
@@ -1395,21 +1397,21 @@
 
             Notes:
 
-            - bon on a tous les blocs de base:
+            - We have all basic building blocs
               - Authentication, SecurityContext, AuthenticationManager, Filters
-            - Comment est-ce que tout ça se "colle" ensemble, et comment je navigue? Comment je
-              découvre?
+            - How do we "glue" all of this together? How do I figure it out?
 
             ---
 
             ## Configurers
 
-            Tout, dans `HttpSecurity`, renvoie ou interagit avec un "builder"
+            Everything in `HttpSecurity` interacts with and returns a "builder"
 
             Notes:
 
             - Ex: httpBasic, formLogin, oauth2Login, authorizeHttpRequests
-            - Extends: AbstractHttpConfigurer, et permet d'interagir avec le httpSecurity
+              - HttpSecurity is a builder itself!
+            - Extends: AbstractHttpConfigurer, allow to interact with Spring Security
 
             ---
 
@@ -1445,12 +1447,10 @@
 
             Notes:
 
-            - Etend un type un peu compliqué pour le pattern "builder"
-            - Deux méthodes importantes, init et configure
-              - init, enregistrer les authentication providers
-              - configure, enregistrer les filtres (accès à plus d'objets + autres configurers déjà
-                initialisés)
-            - éventuellement, le header
+            - `extends` that complicated type - that's for the builder pattern
+            - Two important methods:
+              - init - typically, register auth providers
+              - configure - typically, register filters, as they need more shared filters
             - AbstractConfiguredSecurityBuilder#doBuild
 
             ---
@@ -1475,8 +1475,8 @@
 
             Notes:
 
-            - modifier le header aussi?
-            - câbler dans SecurityConfig, utiliser le builder
+            - wire in the SecurityConfig, use the builder pattern
+            - optional: add the header
 
             ---
 
@@ -1513,11 +1513,11 @@
 
             Notes:
 
-            - 3 façons d'intéragir avec les configurers "built-in"
-              - dans la filter chain
-              - en dehors
-              - avec un "customizer", ça crée le Configurer et le "modifie" tout de suite
-                - intérêt: Kotlin!
+            - 3 ways to interact with built-in configurers
+              - in the filter chain with method chaining
+              - outside the chain
+              - with a lambda customizer
+                - Who knows Kotlin ??
 
             ---
 
@@ -1543,8 +1543,8 @@
 
             Notes:
 
-            - Qui fait du Kotlin?
-            - Semblable à la DSL Kotlin pour spring MVC / router { } (cf: KoFu)
+            - Very similar to Kotlin Spring-MVC DSL (router { }...)
+              - cf KoFu
 
             ---
 
@@ -1575,22 +1575,24 @@
 
             ## PostProcessor
 
-            Comment étendre une classe Spring Security? Exemple:
+            How to extend a SpringSecurity class? Example:
 
-            > Rate-limit par utilisateur, pour le login Google (pas plus de 1 login / minute par
-              user)
+            > Apply rate-limiting, per-user, for Google Login.
+            > Max 1 login / minute / user
 
             Notes:
 
-            - Montrer classe finale (problème pour faire Extends!)
+            - Show the final classes
               - InMemoryOAuth2AuthorizedClientService
               - MappedJwtClaimSetConverter
-            - Parler du use-case
-            - Traces:
-              - Montrer OidcAuthorizationCodeAuthenticationProvider
-              - Montrer que c'est configurable
-            - On pourrait faire un custom provider
-            - mais plutôt ObjectPostProcessor
+            - Explain the use-case
+            - Traces: run a google login with tracing ON
+              - Show OidcAuthorizationCodeAuthenticationProvider
+              - Show it is configurable
+              - We could extend it, but what's the user service? what's the token client?
+            - We could wire it all by hand
+            - Use an object post-processor instead
+              - Trust spring-security, sprinkle it with our behavior on top
 
             ---
 
@@ -1614,9 +1616,8 @@
 
             Notes:
 
-            - On veut faire la même chose
-            - PLUS! un peu de logique
-            - Pattern du delegate
+            - We want to do the same, but with an extrat bit of logic
+            - We wcould extend, but how do we wire it up?
 
             ---
 
@@ -1640,8 +1641,11 @@
 
             Note:
 
-            - Donc on wrappe le truc!
-            - On pourrait en créer un nouveau mais ça poserait le même problème de construction
+            - Instead, wrap an existing object
+              - Classic spring-security pattern, as lots of classes are "final"
+              - Not in this specific case, but majority
+            - Delegate pattern
+            - We could re-create but then we have the same constructor issues
 
             ---
 
@@ -1668,8 +1672,8 @@
 
             Note:
 
-            - Pitié ne faites pas ça hin, c'est juste pour montrer un exemple
-              - Pas faire du "vrai" cache
+            - Please don't do this in prod, though'
+            - It is just an example
 
             ---
 
@@ -1695,10 +1699,10 @@
 
             Notes:
 
-            - Montrer SecurityConfig .withObjectPostProcessor
-            - Montrer comment ça marche
-            - Créer post-processor avec OidcAuthorizationCodeAuthenticationProvider d''abord
-            - On veut restreindre à ce qui nous intéresse vraiment (secure by default!!)
+            - In SecurityConfig show .withObjectPostProcessor
+            - Show how it works
+            - Create OidcAuthorizationCodeAuthenticationProvider post-processor
+              - Only the types we want to touch, lets be secure by default
              
             ---
 
@@ -1725,9 +1729,8 @@
 
             Notes:
 
-            - Câbler
-            - Démo
-            - Paramétriser trop compliqué
+            - Wire it up
+            - Show how it works
 
             ---
 
@@ -1741,9 +1744,10 @@
 
             Notes:
 
-            - On va changer notre RobotAccountFilter pour adhérer aux patterns spring sec
-              - "composability"
-              - découpage en "roles"
+            - Change our RobotAccountFilter
+              - Make it more like spring-sec
+              - "Composability"
+              - "roles" for each bit of this sequential process
 
             ---
 
@@ -1781,7 +1785,7 @@
 
             ---
 
-            ## Plan
+            ## Contents
 
             1. Demo: a baseline
             2. Theory
@@ -1793,11 +1797,12 @@
 
             Notes:
 
-            - Enfin...
-              - Spring Boot fait plein de choses, un petit mot pour comment découvrir comment les
-                choses sont auto-câblées
-              - spring-boot-autoconfigure
-                - security, oauth2
+            - GETTING TO THE END
+              - Spring Boot does _a lot_
+              - How to find what happens? what is autowired for me?
+              - spring-boot-starter-oauth2 -> just pulls in dependencies
+              - spring-boot-autoconfigure package, security > oauth2
+            - Show that "google" in the properties is magic
             
             ---
 
