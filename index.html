@@ -66,8 +66,11 @@
 
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
-        <section data-markdown data-background-image="images/fond_ecran_1080.png"
-          data-background-size="contain">
+        <section data-markdown
+                  data-background-image="images/spring-logo.svg"
+                  data-background-size="180px"
+                  data-background-position="bottom 20px left 30px"
+                  >
           <script type="text/template">
             ## Spring Security - Demystified 🕵️
 
@@ -439,7 +442,7 @@
             ## Consuming Authentication objects
 
             Spring Security produces `Authentication`. They are used for:
-            - Authentification (`authn`): _who_ is the user?
+            - Authentication (`authn`): _who_ is the user?
             - Authorization (`authz`): is the user _allowed to perform_ XYZ?
 
             ---
@@ -677,7 +680,7 @@
 
             ---
 
-            ## Filters - diagramme objet
+            ## Filters - OOP diagram
 
             <img src="images/filterchain-objects.jpg" height="500px">
 
@@ -1053,7 +1056,7 @@
 
             ---
 
-            ## ProviderManager and AuthenticationProvider
+            ## ProviderManager
 
 
             <img src="images/providermanager.png" height="500px">
@@ -1488,7 +1491,7 @@
               .passwordParameter("pw")
               .usernameParameter("user")
               .authenticationDetailsSource(new WebAuthenticationDetailsSource());
-              .and() // retourne HttpSecurity
+              .and() // returns HttpSecurity
 
             // equivalent:
 
@@ -1508,7 +1511,7 @@
                     .passwordParameter("pw")
                     .usernameParameter("user")
                     .authenticationDetailsSource(new WebAuthenticationDetailsSource());
-              }) // pas de .and(), retourne HttpSecurity directement
+              }) // no .and(), returns HttpSecurity directly
             ```
 
             Notes:
