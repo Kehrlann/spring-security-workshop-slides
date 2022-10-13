@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>Spring Security - Décodage et démystification 🕵️</title>
+		<title>Spring Security - Demystified 🕵️</title>
 
 		<meta name="description" content="...">
 		<meta name="author" content="Daniel Garnier-Moiroux">
@@ -66,14 +66,17 @@
 
 			<!-- Any section element inside of this container is displayed as a slide -->
 			<div class="slides">
-        <section data-markdown data-background-image="images/fond_ecran_1080.png"
-          data-background-size="contain">
+        <section data-markdown
+                  data-background-image="images/spring-logo.svg"
+                  data-background-size="180px"
+                  data-background-position="bottom 20px left 30px"
+                  >
           <script type="text/template">
-            ## Spring Security - Décodage et démystification 🕵️
+            ## Spring Security - Demystified 🕵️
 
             <img src="images/profile_picture.jpeg" height="200px" style="border-radius: 50%;">
 
-            Devoxx FR - 2022/04/20
+            Devoxx - 2022/10/11
 
             Daniel Garnier-Moiroux
 
@@ -85,7 +88,7 @@
 
             <img src="images/profile_picture.jpeg" height="200px" style="border-radius: 50%;">
 
-            Software Engineer @ VMware (Spring Commercial)
+            Software Engineer @ VMware (Tanzu Spring)
 
             https://garnier.wf/
 
@@ -96,40 +99,42 @@
 
             
             Notes:
-            C'est moi! Trouvez moi sur internet.
+            That's me. Find me on the internet.
 
-            Je bosse chez VMware, dans les équipes Spring Commercial.
+            I work at VMware, Tanzu Spring
 
-            Je contribue à Spring Security.
+            Spring Security contributor
 
-            Aussi, prof d'informatique pour les élèves de 1ere anné en école d'ingé.
+            Teach CS to engineering students at Mines Paris
 
             ---
 
-            ## Plan
+            ## Contents
 
-            1. Démo de base <!-- .element: class="fragment highlight-blue" -->
-            2. Théorie
+            1. Demo: a baseline <!-- .element: class="fragment highlight-blue" -->
+            2. Theory
                 1. Authentication - "domain language"
-                2. Filter - "bloc de base HTTP"
-                3. AuthenticationProviders - "authentifier"
-                4. Configurers - "naviguer dans spring-security"
+                2. Filter - "HTTP building block"
+                3. AuthenticationProviders - "to authenticate"
+                4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration
             
 
             Notes:
 
-            - On va parler de beaucoup de choses, c'est très dense.
-            - Le but de la présentation: votre autonomie
-              - naviguer seuls dans spring-security
-              - pas coincés sur StackOverflow à ne rien comprendre
-            - PAS LE BUT: vous montrer plein de features que vous ne retiendrez pas
-              - On va rester très concentrés sur l'authentification, l'identité
-              - Pas beaucoup parler d'authorization, la "permission"
-            - Aussi: on va faire que du Servlet, pas du Réactif
-              - C'est un peu différent et je ne suis pas un expert
-            - Caveat: niveau intermédiaire, pas débutant
-              - Si vous n'avez jamais vu Spring, oups
+            - We will cover a LOT of things, dense
+            - Goal: make you autonomous on spring-sec
+              - navigate spring-sec on your own
+              - don't get stuck on StackOverflow
+            - ANTI-goal: show you all cool detailed features
+              - You wouldn't remember them anyway
+            - Focus on authentication == identity, not so much on authorization
+            - Only Servlet, no WebFlux (reactive)
+              - Primitives are slightly different, no expert
+            - Not Spring Security 6.0, although won't change EVERYTHING
+              - The patterns are forward-compatible
+            - Caveat: Intermediate level, NOT beginner
+              - If you don't know spring, this may hurt
 
             ---
 
@@ -143,10 +148,10 @@
 
             - start.spring.io
             - gradle
-            - java 11 
-            - Boot 2.6.x
-            - web + devtools
-            - NOT security yet
+            - java 17 (why not!)
+            - Boot 2.7.x
+            - web
+            - NO dev tools, no security
 
             ---
             
@@ -171,17 +176,16 @@
 
             Notes:
 
-            - Spring Boot classique, une page publique + une privée
-            - Montrer dans le browser
+            - Classic Spring Boot, two pages, public and private
+            - Show in browser
 
             ---
 
             ## build.gradle
 
-            ```gradle [4]
+            ```gradle [3]
             dependencies {
               implementation 'org.springframework.boot:spring-boot-starter-web'
-              implementation 'org.springframework.boot:spring-boot-devtools'
               implementation 'org.springframework.boot:spring-boot-starter-security'
               testImplementation 'org.springframework.boot:spring-boot-starter-test'
             }
@@ -189,12 +193,13 @@
 
             Notes:
 
-            - Ajouter Spring Security
-            - Montrer dans le browser
-            - Montrer les logs
-            - Montrer SecurityAutoConfiguration
+            - Add Spring Security
+            - Show in browser
+            - Show logs
+            - Show SecurityAutoConfiguration
             - SPRINGSEC PATTERN: secure by default
-              - Faites pareil!
+              - show 403 everywhere
+              - Do the same in your apps!
 
             ---
 
@@ -221,9 +226,9 @@
             Notes:
 
             - SecurityFilterChain
-            - D'abord "/private" .authenticated()
-            - Puis le pattern "correct"
-            - Notez: on ne peut pas se logguer!
+            - First: "/private" .authenticated()
+            - Then correct pattern
+            - Notice: we can't log in!
 
             ---
 
@@ -248,8 +253,8 @@
 
             Notes:
 
-            - Ca réactive le form login de Spring Security
-            - Toujours mot de passe auto-généré
+            - Put login form back in
+            - Still auto-generated password
 
             ---
 
@@ -271,20 +276,19 @@
 
             Notes:
 
-            - On peut créer des @Beans qui font des choses
-            - On trouve ça dans la doc/les guides
-            - CF la doc?
-            - Démo!
-            - On peut aussi ajouter d'autres modules de Spring Security
+            - We can create @Beans that do things
+            - Find it in the guides
+            - CF spring sec doc
+            - Demo
+            - Now we can turn on other spring-sec modules
 
             ---
 
             ## build.gradle
 
-            ```gradle [5]
+            ```gradle [4]
             dependencies {
               implementation 'org.springframework.boot:spring-boot-starter-web'
-              implementation 'org.springframework.boot:spring-boot-devtools'
               implementation 'org.springframework.boot:spring-boot-starter-security'
               implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
               testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -293,11 +297,11 @@
 
             Notes:
 
-            - Login oauth2/open id
-            - Est-ce que vous êtes familiers avec OAuth2? 
-            - On ne va pas parler du protocole en particulier
-            - Mais le combo boot + security permet de juste changer la config
-            - Et activer un nouveau type de login
+            - Login with OAuth2 / OpenID
+            - Are you familiar with OAuth2 ?
+            - We won't describe the protocol in detail
+            - Boot + Security: change the config,
+            - => activate a new login type
             
             ---
 
@@ -323,7 +327,7 @@
 
             Notes:
 
-            - Activer le nouveau type de login
+            - Activate new login
             - Spring Security Pattern: all config in one place!
 
             ---
@@ -343,14 +347,14 @@
 
             Notes:
 
-            - Ajouter google via console.cloud.google.com
+            - Add Google through console.cloud.google.com
             - Search Api Keys, Add new OAuth2 Login
             - redirect url: 
 
             `http://localhost:8080/login/oauth2/code/google`
 
-            - Configurer le client-id/secret
-            - Login: tadaa!
+            - Configure client-id/secret, login: tadaa!
+            - Now, let's USE the authentication data
 
             ---
 
@@ -374,9 +378,10 @@
 
             Notes:
 
-            - On peut injecter l'authentication
+            - Inject the Authentication
               - Spring Security Pattern: injection!
-            - Et afficher le nom
+            - Print the name: for Google, ugly `sub` claim
+            - We can extract the email claim
 
             ---
 
@@ -399,89 +404,90 @@
 
             Notes:
 
-            - maintenant le nom c'est un peu moche via google
-            - c'est un guid dans le cadre de ce serveur
-            - on peut extraire l'e-mail mais c'est touchy...
+            - Touchy though, I have notes
+            - Requires breakpoint + inspecting Authentication
 
             ---
 
-            ## Alors?
+            ## So?
 
-            C'est compliqué, n'est-ce pas? <!-- .element: class="fragment" -->
+            A bit ... complex, isn't it? <!-- .element: class="fragment" -->
             
             Notes:
 
-            - Compliqué n'est-ce pas?
+            - Complicated, innit?
+            - Complex: many threads weaved together
 
             ---
 
-            ## Plan
+            ## Contents
 
-            1. Démo de base
-            2. Théorie
+            1. Demo: a baseline
+            2. Theory
                 1. Authentication - "domain language" <!-- .element: class="fragment highlight-blue" -->
-                2. Filter - "bloc de base HTTP"
-                3. AuthenticationProviders - "authentifier"
-                4. Configurers - "naviguer dans spring-security"
+                2. Filter - "HTTP building block"
+                3. AuthenticationProviders - "to authenticate"
+                4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration
 
             Notes:
 
-            - Le but de la démo ce n'est pas que vous sachiez reproduire
-            - Ni même que vous reteniez
-            - Juste montrer que c'est compliqué
-            - Et donner une base de discussion
+            - Again: I don't expect you to reproduce this after the talk
+            - I don't even expect you to commit this to memory
+            - Just show case that it's powerful BUT complex
+            - Have a substrate to discuss things
 
             ---
 
-            ## Côté "consommateur"
+            ## Consuming Authentication objects
 
-            Spring Security produit des `Authentication`. Celles-ci sont utilisées pour:
-            - Authentification (`authn`): _qui_ est le user?
-            - Authorization (`authz`): est-ce que le user _à le droit de faire_ XYZ?
+            Spring Security produces `Authentication`. They are used for:
+            - Authentication (`authn`): _who_ is the user?
+            - Authorization (`authz`): is the user _allowed to perform_ XYZ?
 
             ---
 
-            ## Un peu de vocabulaire
+            ## Vocabulary
 
-            - **Authentication**: représente l'utilisateur. Contient:
-              - **Principal**: "identité" de l'utilsateur (nom, email...)
+            - **Authentication**: represents the user. Contains:
+              - **Principal**: user "identity" (name, email...)
               - **GrantedAuthorities**: "permissions" (`roles`, ...)
 
-            Plus de détails: https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
+            More details: https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
 
             Notes:
 
-            - Authentication: ce que Spring Sec produit, représente une entité authentifiée
-            - Principal: "qui" est identifié, c'est ce qui vous intéresse le plus
-              - e.g. nom, adresse mail, client_id, etc.
+            - Authentication: what SpringSec produces, an "entity Authenticated", user, machine, ...
+            - Principal: "who" is authenticated, what's most interesting to you
+              - e.g. name, e-mail address, client_id, etc.
             - GrantedAuthorities
-              - souvent la forme "ROLE_admin"
-              - un simple wrapper autour d'une String
-              - On ne verra pas tous les détails ajd, se concentre sur l'identité
+              - Often "ROLE_admin"
+              - Often a wrapper around a simple string
+              - Not our focus today, we are focusing on identity
 
             ---
 
-            ## Un peu de vocabulaire (cont')
+            ## Vocabulary (cont')
 
-            - **Authentication** contient aussi:
-              - **.isAuthenticated()**: presque toujours `true`
-              - **details**: infos supplémentaires sur la _requête_
-              - (Credentials): "password", souvent mis à `null`
+            - **Authentication** also contains:
+              - **.isAuthenticated()**: almost always `true`
+              - **details**: details about the _request_
+              - (Credentials): "password", often `null`
             
-            Plus de détails: https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
+            More details: https://docs.spring.io/spring-security/reference/servlet/authentication/architecture.html
+
 
             Notes:
 
-            - Moins intéressant
-              - isAuthenticated: true, sinon la requête peut être rejetée
-            - Montrer classe authentication
-            - Notez que Principal est un `Object`
-              - grand thème de la flexibilité spring-security
+            - Less interesting
+              - isAuthenticated: true, Otherwise request is rejected
+            - Show Authentication class
+            - Principal is an `Object`
+              - Spring sec principle: extensibility through objects
 
             ---
 
-            ## Et du coup
+            ## Consequence...
 
             ```java
             @Override
@@ -495,8 +501,8 @@
 
             Notes:
 
-            - Du coup ce n'est pas la lib la plus type-safe du monde
-            - Mais ça permet de s'interfacer avec le monde entier, future-proof
+            - Not the most type-safe lib in the world
+            - But can integrate with whatever you want it to
 
             ---
 
@@ -515,78 +521,78 @@
             Notes:
 
             - extends Principal: java.security.Principal
-            - Je vous encourage à travailler exclusivement avec des objets Spring Security
+            - Only ever use Spring-Security objects
               - Don't: public String foo(Principal principal)
               - Do: foo(Authentication auth)
-            - getPrincipal: `Object` comme ça super extensible
-              - Très, très, très confusant
-              - Exemple: UserDetails dans UsernamePasswordAuthenticationToken
-              - Comment trouver? Debugger le plus simple.
-              - Montrer.
+            - getPrincipal: `Object` -> extensibility
+              - Very, very confusing
+              - Example: UserDetails in UsernamePasswordAuthenticationToken
+              - How to find out? Breakpoints!
+              - Demo it with Google log in
             
             ---
 
-            ## Pour vos applis
+            ## For your own apps
 
             - **DO**:
-              - Créer vos propres sous-classes `Authentication`
+              - Create your own `Authentication` subclasses
             - **DON'T**:
-              - Utiliser `UsernamePasswordAuthenticationToken` partout 
+              - Use `UsernamePasswordAuthenticationToken` everywhere 
 
             Notes:
 
-            - Même dans les tests! TestingAuthenticationToken, etc
+            - Even in tests! TestingAuthenticationToken, etc
 
             ---
 
-            ## Le tout dans un SecurityContext
+            ## Wrapped in a SecurityContext
 
-            - Thread-local, non propagé passé aux threads enfants
-            - Nettoyé quand la requête est traitée à 100%
+            - Thread-local, not propagated to child threads
+            - Cleared after requests is 100% processed
 
             Notes:
 
-            - Montrer SecurityContextHolder.getSecurityContext().getAuthentication()
-              - Pratique si vous ne voulez pas cascader
-            - Montrer new Thread(...).start()
-            - Pratique si nesté!
-              - Montrer un FooService
-              - Montrer @PreAuthorize()
+            - Show SecurityContextHolder.getSecurityContext().getAuthentication()
+              - Useful to allow passing authentications down the stack
+              - Show a fake FooService
+              - Show @PreAuthorize()
+            - Show new Thread(...).start()
             - Spring Security Pattern: all config in one place ...
               - ... but defense-in-depth!
+            - Talk about SecurityContextPersistenceFilter
 
             ---
 
-            ## Récapitulatif
+            ## Recap
 
             <img src="images/securitycontextholder.png" height="200px">
 
             Notes:
 
-            - Simple pour l'utilisation
+            - Easy to use
             - SecurityContextHolder -> SecurityContext
-            - Objet qui nous intéresse, une Authentication
-              - Avec un Principal (identité) et GrantedAuthorities ("permissions")
+            - What we care about is an Authentication object
+              - With a Principal (identity) and GrantedAuthorities ("permissions")
 
             ---
 
-            ## Plan
+            ## Contents
 
-            1. Démo de base
-            2. Théorie
+            1. Demo: a baseline
+            2. Theory
                 1. Authentication - "domain language"
-                2. Filter - "bloc de base HTTP" <!-- .element: class="fragment highlight-blue" -->
-                3. AuthenticationProviders - "authentifier"
-                4. Configurers - "naviguer dans spring-security"
+                2. Filter - "HTTP building block" <!-- .element: class="fragment highlight-blue" -->
+                3. AuthenticationProviders - "to authenticate"
+                4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration
 
             Notes:
 
-            - On a vu Authentication, et comment utiliser ce que Spring Security produit
-              - Pas le coeur de cette présentation
-              - Mais important de parler de que c'est
-            - Maintenant voyons un peu comment Spring Secrity produit des authentifications!
-            - Spring Security ca securise des endpoints HTTP
+            - We've seen Authentication, and how to use what Spring Sec producdes
+              - Not the heart of our presentation
+              - Important to mention it though, as it's core
+            - Now, let's see HOW spring sec produces authentications
+            - Spring Security is for securing HTTP endpoints
 
             ---
 
@@ -595,13 +601,14 @@
             <img src="images/filterchain.png" height="500px">
 
             Notes:
-            - Ca c'est l'archi Servlet, pas juste spring sec
-            - Chaque élément (filtre + servlet) a accès aux objets requete et réponse
-            - Un client envoie une requête, le container servlet crée une chaîne de filtres,
-              exécutés dans l'ordre, puis la servlet qui doit traiter la réponse
+            - This is the java Servlet architecture, not just Spring Security
+            - Every element (filter + servlet) can access Request and Response objects
+            - A client sends and HTTP request, the servlet container executes a filter chain, in
+              order, and the the Servlet which produces the content
+              - Servlet container: Tomcat, Jetty, JBoss, WebLogic,...
             - Filters == "pre-processing"
-              - Soit couper la connection + écrire la réponse (think: CSRF)
-              - Soit modifier la Requête ou la Réponse, ou "le contexte 
+              - Either cut further processing and write an error to the response (think: CSRF)
+              - Or modify the Request, response, or the global context in which those are exectued
 
             ---
 
@@ -611,9 +618,9 @@
 
             Notes:
 
-            - Spring apporte ses propres abstractions pour câbler des Filtres
-            - (Lifecycle différent: les filtres doivent être créés à la création du container,
-            différent du lifecycle de l'application contenxt spring)
+            - Spring has its own abstractions for wiring in Filters
+            - (Because the Spring lifecycle is different from the container's: the filters must be
+              registered when creating the container, whereas Spring wires things later)
 
             ---
 
@@ -623,7 +630,8 @@
 
             Notes:
 
-            - Et Spring Security aussi ..., tout ca, ca descend
+            - Then Spring Securiyt has its own abstractions
+            - Turtles all the way down (or at least abstractions)
 
             ---
 
@@ -632,14 +640,15 @@
             <img src="images/securityfilterchain.png" height="500px">
 
             Notes:
-
-            - Ca descend, jusqu'à ce qui nous intéresse... la SecurityFilterChain
-            - C'est un peu plus subtil mais on va en rester là
-            - (En fait, il peut y avoir plusieurs SecurityFilterChains, managées par le
-            FilterChainProxy, protégeant chacun un "path" différent avec des filtres différents)
-            - La SecurityFilterChain c'est comme une filter chain normale, mais avec quelques
-            fonctionnalités par défaut en plus ; et c'est un point d'entrée dans Spring Security
-            - Montrer: breakpoint dans DefaultSecurityFilterChain constructeur
+            - All the way down, until we find the important piece: the SecurityFilterChain
+            - Sligtly more subtle than this:
+              - You can have _multiple_ SecurityFilterChains, managed by the FilterChainProxy
+              - Each SecurityFilterChain protects an HTTP path with different filters
+              - For the sake of the example, we assume one SecFilterChain
+            - SecurityFilterChain is a "normal" or "regular" FilterChain, with small additions, and
+              it's the entrypoint to Spring Security
+              - Everything you declare in spring sec will be there
+            - SHOW: breakpoint in DefaultSecurityFilterChain
 
             ---
 
@@ -650,32 +659,35 @@
               HttpServletRequest request, 
               HttpServletResponse response, 
               FilterChain chain) {
-                // 1. Avant de continuer (e.g. authentication)
+                // 1. Before the request proceeds further (e.g. authentication or reject req)
                 // ...
 
-                // 2. Invocation de "la suite"
+                // 2. Invoke the "rest" of the chain
                 chain.doFilter(request, response);
 
-                // 3. Une fois que la requête a été gérée
+                // 3. Once the request has been fully processed (e.g. cleanup)
                 // ...
             }
             ```
 
             Notes:
 
-            - Dans une classe `Filter` ça ressemble à ça
-            - Ça veut dire que chaque filter appelle "la suite", c'est pas une boucle for
+            - That's a filter
+            - Describe the actions
+            - Usually only 1 and 2 ; example of 3: SecurityContextPersistenceFilter
+            - See how each filter calls the filter chain back? That's not a loop
+              - It's based on the chain-of-responsibility pattern
 
             ---
 
-            ## Filters - diagramme objet
+            ## Filters - OOP diagram
 
             <img src="images/filterchain-objects.jpg" height="500px">
 
             Notes:
 
-            - En représentant un peu les objets, ça donne ça
-            - Expliquer
+            - A simplified view of this
+            - Explain
 
             ---
 
@@ -685,8 +697,8 @@
 
             Notes:
 
-            - Donc si on représente le diagramme précédent sous forme de call stack...
-            - Donc si il y a une exception dans le filtre3, elle peut être attrapée par le fitlre2
+            - If we do a call stack of the previous diagram, it looks like this
+            - Interesting: an exception in Filter 3 can be caught by Filter 2
   
             ---
 
@@ -696,29 +708,31 @@
 
             Notes:
 
-            - En pratique, ça donne des stack traces un peu compliquées...
+            - This is why the stack trace is somewhat hard to follow
+            - We'll come back to this
 
             ---
 
-            ## ... respirez 🧘 ...
+            ## ... Take a deep breath 🧘 ...
 
             <img src="images/kitten.gif" height="500px">
 
             Notes:
             
-            - Promis on en sort doucement
-            - Respirez, profitez, étirez-vous
+            - I promise, we're almost done with the big chunck of theory
+            - We're going to get coding
+            - Take a deep breath, stretch
 
             ---
 
-            ## ... respirez 🧘 ...
+            ## ... Take a deep breath 🧘 ...
 
             <img src="images/puppy.gif" height="500px">
 
             Notes:
             
-            - Il n'y en a pas que pour les chats
-            - On va faire du code! Allez!
+            - There's no reason only kitten lovers get their share of gifs, so here are some puppies
+            - Alright, let's code! Let's go!
 
             ---
 
@@ -729,22 +743,21 @@
               HttpServletRequest request, 
               HttpServletResponse response, 
               FilterChain chain) {
-                // 1. Avant de continuer (e.g. authentication)
+                // 1. Before the request proceeds further (e.g. authentication or reject req)
                 // ...
 
-                // 2. Invocation de "la suite"
+                // 2. Invoke the "rest" of the chain
                 chain.doFilter(request, response);
 
-                // 3. Une fois que la requête a été gérée
+                // 3. Once the request has been fully processed (e.g. cleanup)
                 // ...
             }
             ```
 
             Notes:
 
-            - Vous vous rappelez?
-            - Implémentons notre propre Filter...
-
+            - Remember this?
+            - Let's see this in practice!
 
             ---
 
@@ -765,13 +778,16 @@
 
             Notes:
 
-            - Commencer par implements Filter, mais ça c'est du javax.servlet
-            - Je vous ai recommandé de n'utiliser que des classes Security
-              - en plus, si vous faites filter, faut se poser la question des métodes lifecycle...
-              - au moins GenericFilterBean, spring-web, pas de questions
-              - mieux: OncePerRequestFilter - le nom est assez éloquent
-            - On va juste faire un log
-            - Pour l'instant jamais exécuté, faire un curl pour montrer
+            - Start by implementing Filter (javax.servlet)
+            - Explain the use-case
+            - I recommended using Spring Security classes only
+              - If you go with javax.servlet, you have to think about the lifecycle
+              - So, at least, use a Spring-Web GenericFilterBean
+              - There are useful sub-implementations
+              - Show diagram, then show descendants, layout = radial.radial
+              - the most used child impl: OncePerRequestFilter - it's all in the name
+            - Alright so let's start with a log
+            - This is _never_ exectued, if we curl we will see it's not in there
 
             ---
 
@@ -797,9 +813,12 @@
 
             Notes:
 
-            - Il faut qu'on le mette quelque part dans la chaîne
-            - On sait qu'on a un UsernamePasswordAuthenticationFilter
-            - Montrer dans le browser, expliquer pourquoi ça apparaît 2 fois
+            - We need to add it somewhere in the filter chain!
+            - .addFilterBefore
+            - _Where_ is a more advanced topic, if you're performing authentication, it could be
+              before any AbstractAuthenticationFilter, or in our case
+              UsernamePasswordAuthenticationFilter
+            - Show in the browser. Explain why the log happens twice.
 
             ---
 
@@ -824,12 +843,14 @@
             ```
 
             Notes:
-            - On va lire un header
-            - Si le header a la bonne valeur, on va mettre une authentification
-              - PAS UsernamePasswordAuthenticationToken!! Montrer ce qu'on pourrait mettre dedans.
-              - Pour l'instant, créer la classe mais vide
-            - On la set dans le context holder, et chain.doFilter()
-            - Sinon, on ne fait rien
+            - So let's read a header
+            - If it has the correct value, create an authentication
+              - NOT UsernamePasswordAuthenticationToken - show what would be required
+              - For now, create an empty class RobotAuthentication
+            - Set the authentication in the context holder
+              - What else do we need to do?
+              - Anyone remembers? call chain.doFilter()
+            - If incorrect, return UNAUTHORIZED and close the response
 
             ---
 
@@ -855,14 +876,14 @@
 
             Notes:
 
-            - Authentication minimale
-            - Toujours authentifiée, nom hardcodé
-              - Spring Security Pattern: immutability, pas de "setAuthenticated"
-              - Possible mais pas recommandé (retrocompatibilité)
-            - curl vers "private" avec le header -> ça fonctionne !
-            - montrer avec un breakpoint
-            - montrer que browser vers /private c'est pété 401
-            - (Optionel, parler du role)
+            - Minimal auth
+            - Always authenticated, hardcoded name
+              - Spring Security Pattern: immutability, do not allow "setAuthenticated"
+              - Possible but not recommended, mostly here for backward-compatibility
+            - curl to "/private" with the header -> It Works™™
+            - Show with a breakpoint
+            - Go to /private in the browser: broken
+            - (opt: talk about the role)
 
             ---
 
@@ -883,36 +904,39 @@
 
             Notes:
 
-            - Vérifier que le header est présent, sinon continuer sans authent'
-            - Le filtre dit "cette requête ne me regarde pas"
-            - COOL! Recap.
+            - Let's check our filter again: if the header is NOT present, 401
+            - Start by checking whether you should try authenticating this request, is the header
+              present?
+              - If not, filter says "not my responsibility"
+            - Try both again.
+            - COOL! It works. Let's recap.
 
             ---
 
-            ## Récap!
+            ## Recap!
 
-            1. Créer un `Filter`: décision d'authentification
-              1. Prend une HttpServletRequest, HttpServletResponse
-              2. Lis et écris
-            2. Créer une `Authentication`: résultat d'authentification
-              1. Une classe qui a du sens, pas `UsernamePassword...`
-            3. Activer le `Filter` dans la `SecurityFilterChain`
-
+            1. Create a `Filter`: make an Authentication decision
+              1. Takes HttpServletRequest, HttpServletResponse in
+              2. Reads from request, (sometimes) writes to Response
+            2. Create an `Authentication`: the result of the auth process
+              1. A _meaningful_ class, not `UsernamePassword...`
+            3. Register the `Filter` in the `SecurityFilterChain`
 
             Notes:
 
-            - Le cas qu'on a montré == vrai cas, si vous avez besoin d'un accès API-only
-            - Bon avec de la _vraie_ sécurité, pas un truc hardcodé comme on a fait
+            - That's a real-world use-case, say you need API-only access
+            - But if you do it, do it with proper security
+              - And maybe use existing protocols, e.g. OAuth with client_credentials
 
             ---
 
-            ## Un "vrai" exemple
+            ## A "real" example
 
             `CsrfFilter.java`
 
             Notes:
 
-            - Qui connaît le principe de CSRF, Cross Site Request Forgery?
+            - Who doesn't know how Cross-Site Request Forgery works?
 
             ---
 
@@ -922,12 +946,18 @@
 
             Notes:
 
-            - Attaque maintenant moins courante avec les nouvelles protections de cookies
-            - Idée: se connecter légitimement sur un site (ici: bank)
-            - Un site malicieux a un bouton qui fait un "POST" vers une page du vrai site
-            - Le browser utilise vos cookies pour faire passer la requête comme si elle venait du
-              site principal (ici: bank)
-            
+            - Browsers are being stricter with cookies so harder to pull this one off
+            - Idea:
+              - user connects to a website, legit authentication
+              - user browsers to malicious site
+              - there is a button the malicious site that does a POST request to the legit site
+                - e.g. "transfer X monies to this address"
+              - browser uses the cookies of the legit authentication to send the POST
+              - ouch
+            - Used that in the internal "social network" pages of my engineering school, back in the
+              days - I had an HTML form, with all "hidden" fields, and a "click me button", rewrote
+              the user's profile
+
             ---
 
             ## Protection
@@ -938,25 +968,27 @@
             
             Notes:
 
-            - Idée, générer un token à chaque requête, stocké dans la session
-            - Partager ce token dans tous les forms générés
+            - Every time a form is generated, create a token
+              - Store it in the session
+              - set as a hidden field in the form
+            - When a POST is made, tokens must match
 
             ---
 
-            ## Un "vrai" exemple
+            ## A "real" example
 
             Spring Security: `CsrfFilter.java`
 
             Notes:
 
-            - Montrer le code
-            - Notez: on ne peut pas _vraiment_ étendre Spring Security pour ses propres use-cases
-              sans comprendre les concepts / protocoles sous-jacents
-              - Ex: OAuth2 Login...
+            - Show the code
+            - Notice: You can't extend spring-sec for your own needs UNLESS you understand the
+              security domain you are working with (concepts, protocols, ...)
+              - Ex: OAuth2 Login, if you don't understand OAuth
 
             ---
 
-            ## Et les autres Filters?
+            ## And all the other filters?!
 
             ```yaml
             logging.level:
@@ -965,42 +997,44 @@
 
             ---
 
-            ## Plan
+            ## Contents
 
-            1. Démo de base
-            2. Théorie
+            1. Demo: a baseline
+            2. Theory
                 1. Authentication - "domain language"
-                2. Filter - "bloc de base HTTP"
-                3. AuthenticationProviders - "authentifier" <!-- .element: class="fragment highlight-blue" -->
-                4. Configurers - "naviguer dans spring-security"
+                2. Filter - "HTTP building block"
+                3. AuthenticationProviders - "to authenticate" <!-- .element: class="fragment highlight-blue" -->
+                4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration
-            
 
             Notes:
 
-            - Avec CSRF-Filter, on montre un filtre qui bloque
-            - Avec RobotAccountFilter, on montre un filte qui authentifie
-            - On pourrait aussi faire des filtres qui écrivent dans la réponse (à la place des
-              endpoints Spring MVC par exemple)
-            - Mais on va creuser les sujets d'authentification plutôt
+            - With CSRF-Filter, show a filter that:
+              - Blocks on "not allowed"
+              - (and also has side-effects)
+            - With RobotAccountFilter, show a filter that does Authentication
+            - We could also show Filters that write the response (instead of MVC endpoints)
+              - Used in Spring Authorization Server, when issuing tokens
+              - But you already get the gist of it
+            - Let's dig more into authentication topics
 
-            
             ---
 
             ## Authentication
 
-            A propos des `Authentication`s... J'ai ~menti~ simplifié un peu.
+            About those `Authentication`s... I may have ~lied~ oversimplified a bit.
 
             🤫
 
             Notes:
 
-            - Vous vous rappelez quand j'ai parlé d'Authentication au début?
-            - J'ai dit que ça représentait quelqu'un d'authentifié...
-            - En fait ça peut aussi représenter un "Token" à authentifier
-            - Qui contient des credentials, ensuite il y a un truc qui décide si les credentials
-              sont valides ou non, traite l'authent', et en renvoie une autre
-            - D'où les credentials qui sont null et "authenticated" == true
+            - remember when I talked about Authentication in the beginning
+            - I said "it represents an authenticated entity"
+            - Actually, it also represents a Token, a bundle of data, to authenticate
+            - Token contains credentials, then something decides whether those creds are valid or
+              not, process the Authentication object and return a new Authentication
+            - Only when this process has gone through do the credentials become null, and
+              authenticated == true
 
             ---
 
@@ -1010,26 +1044,29 @@
 
             Notes:
 
-            - Ce qui rentre, authenticated == false, credentials != null
-            - Ce qui sort, authenticated == true, credentials == null
-            - Exemple dans UsernamePasswordAuthenticationFilter#attemptAuthentication, breakpoint
-            - Montrer la classe AuthenticationManager
-            - Type X qui rentre, souvent type X qui ressort, mais avec #authenticated() == true
-              - Ça peut renvoyer null s'il ne sait pas quoi faire, (e.g. user n'existe pas)
+            - Input has a
+
+            - Input has authenticated == false, credentials != null
+            - Output has authenticated == true, credentials == null
+            - Example in UsernamePasswordAuthenticationFilter#attemptAuthentication, breakpoint
+            - Show AuthenticationManager
+            - Most always, input is of type X, output is also of type X, but #authenticated() == true 
+              - Or null (I don't know how to deal with this)
+              - Or exception (Stop trying to authenticate)
 
             ---
 
-            ## ProviderManager et AuthenticationProvider
+            ## ProviderManager
 
 
             <img src="images/providermanager.png" height="500px">
 
             Notes:
 
-            - Implémentation courante
-            - Permet de rajouter ses propres pour gérer certains types d'authentification
-            - Et ça fait des trucs bonus, genre gérer les credentials, publier des événements
-            - Nous on va plutôt implémenter des authentication-provider
+            - Spring-Security reference implementation
+            - Add your own AuthenticationProviders for authenticating tokens
+            - Has built-in behavior: clean up credentials, publish events, etc.
+            - Usual entry point into Spring Sec: custom AuthenticationProviders
 
             ---
 
@@ -1040,11 +1077,11 @@
 
             Notes:
 
-            - A savoir, il peut y avoir des hierarchies
-            - Donc si le ProviderManager n'arrive pas à authentifier, il demande à son parent
-              d'authentifier, et ainsi de suite.
-            - Souvent utilisé pour un auth manager "global"
-            - Mais c'est juste une petite note, pas crucial pour ce qu'on veut montrer
+            - Good to know: Hierarchies
+            - If provider manager can't authenticate, delegates to its parent, and so on
+              - useful for "global" authentication managers
+            - Just a small note, not core to what we want to show - but helps debug!
+            - Show the example of the UserDetailsService: breakpoint in ProviderManager#new
             
             ---
 
@@ -1062,15 +1099,15 @@
 
             Notes:
 
-            - Donc, je disais, nous on va faire des AuthenticationProvider
-            - Très simple, ça dit: 
-              - est-ce que je supporte ce type d'authentification?
-              - voilà comment authentifier
-              - Trois possibilités de retour: authentication (authentifié), null (pas de
-                décision,déléguer à quelqu'un d'autre), AuthenticationException (STOP! ne pas
-                authentifier, e.g. "compte bloqué")
-            - Implémentons un exemple
-
+            - I was saying: let's make an AuthenticationProvider! (show interface)
+            - Quite simple, two methods:
+              - do I support this Authentication type (or class)?
+              - Here's how you authenticate
+              - remember, thre possibilities:
+                - authentication: authenticated
+                - null: don't know what to do, delegate to following
+                - exception: STOP! don't authenticate, e.g. "blocked account"
+            - Let's implement an example
 
             ---
 
@@ -1100,14 +1137,13 @@
 
             Notes:
 
-            - Daniel a TOUJOURS le droit de s'authentifier. Et en plus, il a tendance à oublier son
-              password donc on l'autorise à se connecter avec n'importe quel pw
-            - On crée notre AuthProvider qui supporte UsernamePasswordAuthenticationProvider
-            - Supports UsernameAuthenticationToken par exemple (donc pas utilisé sur Oauth), mais
-              on pourrait accepter n'importe quoi en vrai
-            - En général si c'est X en entrée on fait X en sortie, donc respectons le contrat
-              implicite
-            - On renvoie authentifié si jamais name == "daniel", avec role -> admin (pourquoi pas?!)
+            - Daniel is nice. But has really really poor memory.
+            - Daniel can ALWAYS authenticate - and we don't really care about the password.
+            - Create an AuthProvider, supporting UsernamePassworAuthenticationProvider
+            - Support UsernameAuthenticationToken for example (not used on OAuth!), but we could
+              accept anything
+            - Usually, input = X -> output = X, let's respect that contract
+            - Be authenticated if name == "daniel", and set role == admin (eh, why not?)
 
             ---
 
@@ -1133,11 +1169,11 @@
 
             Notes:
 
-            - On le cable dans la filter-chain
-            - montrer dans le browser
-            - comme ça supporte UsernamePasswordAuthenticationToken, tout ce qui produit cette
-              classe est supporté
-            - Par exemple: httpBasic()
+            - Register it in the filter-chain
+            - show in the browser
+            - as it supports UsernamePasswordAuthenticationToken, anything producing that is
+              supported
+            - For example: httpBasic()
 
             ---
 
@@ -1156,13 +1192,12 @@
 
             Notes:
 
-            - J'ai dit que le ProviderManager faisait des trucs bonus
-            - Par exemple, publier des événements
-            - Pour l'instant il faut câblere l'event publisher à la main, c'est de la plomberie qui
-              n'est pas tout à fait solidifiée en attendn spring-sec 6.0.
-              - Je pense que ça sera automatique avec Spring 6.0
-            - AuthEventPublisher c'est un Bean créé par Spring Boot dans ce cas.
-            - Qui émet des événements de login  
+            - I said ProviderManager does additional stuff, e.g. logs!
+            - For example, publish events
+            - In this configuration style, need to wire up event publisher manually
+              - Fixed in 6.0.0 when it comes out, automatically created
+            - AuthEventPublisher is created by Boot
+            - Now the AuthenticationManager emits authentication events
 
             ---
 
@@ -1185,8 +1220,8 @@
 
             Notes:
 
-            - On peut consommer les événements, pas de plomberie particulière à faire
-            - Montrer login user, login password
+            - Which we can listen to and consume
+            - Show login with `user`, login with `daniel`
 
             ---
 
@@ -1231,8 +1266,8 @@
 
             Notes:
 
-            - On peut transformer notre truc de Robot pour ressembler plus à Spring Security
-            - Deux méthodes statiques pour en créer un
+            - So let's evolve our Robot authentication to meet Spring Security "standards"
+            - Let's do two static methods for clarity
               - Spring Security Pattern: immutability!
 
             ---
@@ -1269,9 +1304,9 @@
 
             Notes:
 
-            - Donc si vous avez bien suivi, on va faire quoi là?
-              - Oui, un authentication provider!
-            - Disons qu'on va le rendre un peu flex, avec plusieurs mots de passe configurables
+            - Have you been paying attention, what should be doing here?
+              - Yes, an authentication provider!
+            - Let's make it a bit more flexible, with multiple auth passwords
 
             ---
 
@@ -1307,9 +1342,9 @@
 
             Notes:
 
-            - On modifie le Robot Account Filter pour utiliser un authentication manager
-            - On peut abstraire la conversion "Request -> Authentication(Token)"
-            - Ensuite on authentifie avec le manager et on met un try-catch autour
+            - Change the RobotAccountFilter to use an AuthenticationManager
+            - We could make abstract away the conversion between Request and AuthenticationToken
+            - Then we use the AuthManager, and wrap this in a try-catch for nicer failures
 
             ---
 
@@ -1335,49 +1370,51 @@
 
             Notes:
 
-            - On câble dans la FilterChain
-            - Notez qu'on utilise un provider manager à la main, bof bof
-              - Mais ça ira pour l'instant!
-            - Montrer le curl qui fonctionne + les events dans la console
+            - Wire everything up in the filterchain
+            - Note that we create a ProviderManager before, not great
+              - We should reuse the one from the filter chain
+              - Good enough for now, we'll see later
+            - Show that curl works, and show console authentication events
 
             ---
 
-            ## Récapitulatif!
+            ## Recap!
 
-            1. Les `Authentication`s sont des tokens à _essayer_ d'authentifier ET des
-            authentifications réussies.
-            2. La transformation se passe dans un `AuthenticationProvider`
-            3. C'est là que vous pouvez créer vos propres règles
+            1. `Authentication`s are a sets of credentials for authentication AND the
+            output of successful authentication.
+            2. Transforming credentials into authentication happens in `AuthenticationProviders`
+            3. That's where you should create your own authentication rules
+              - with caveats, of course
 
             ---
 
-            ## Plan
+            ## Contents
 
-            1. Démo de base
-            2. Théorie
+            1. Demo: a baseline
+            2. Theory
                 1. Authentication - "domain language"
-                2. Filter - "bloc de base HTTP"
-                3. AuthenticationProviders - "authentifier"
-                4. Configurers - "naviguer dans spring-security" <!-- .element: class="fragment highlight-blue" -->
+                2. Filter - "HTTP building block"
+                3. AuthenticationProviders - "to authenticate"
+                4. Configurers - "navigate Spring Security" <!-- .element: class="fragment highlight-blue" -->
                 5. Spring Boot Auto-Configuration
 
             Notes:
 
-            - bon on a tous les blocs de base:
+            - We have all basic building blocs
               - Authentication, SecurityContext, AuthenticationManager, Filters
-            - Comment est-ce que tout ça se "colle" ensemble, et comment je navigue? Comment je
-              découvre?
+            - How do we "glue" all of this together? How do I figure it out?
 
             ---
 
             ## Configurers
 
-            Tout, dans `HttpSecurity`, renvoie ou interagit avec un "builder"
+            Everything in `HttpSecurity` interacts with and returns a "builder"
 
             Notes:
 
             - Ex: httpBasic, formLogin, oauth2Login, authorizeHttpRequests
-            - Extends: AbstractHttpConfigurer, et permet d'interagir avec le httpSecurity
+              - HttpSecurity is a builder itself!
+            - Extends: AbstractHttpConfigurer, allow to interact with Spring Security
 
             ---
 
@@ -1413,12 +1450,10 @@
 
             Notes:
 
-            - Etend un type un peu compliqué pour le pattern "builder"
-            - Deux méthodes importantes, init et configure
-              - init, enregistrer les authentication providers
-              - configure, enregistrer les filtres (accès à plus d'objets + autres configurers déjà
-                initialisés)
-            - éventuellement, le header
+            - `extends` that complicated type - that's for the builder pattern
+            - Two important methods:
+              - init - typically, register auth providers
+              - configure - typically, register filters, as they need more shared filters
             - AbstractConfiguredSecurityBuilder#doBuild
 
             ---
@@ -1443,20 +1478,20 @@
 
             Notes:
 
-            - modifier le header aussi?
-            - câbler dans SecurityConfig, utiliser le builder
+            - wire in the SecurityConfig, use the builder pattern
+            - optional: add the header
 
             ---
 
             ## FormLoginConfigurer
 
-            ```java [1-5|9-17|21-28]
+            ```java [1-6|9-17|21-28]
             http.formLogin()
               .loginPage("/custom-login-page")
               .passwordParameter("pw")
               .usernameParameter("user")
               .authenticationDetailsSource(new WebAuthenticationDetailsSource());
-              .and() // retourne HttpSecurity
+              .and() // returns HttpSecurity
 
             // equivalent:
 
@@ -1476,16 +1511,16 @@
                     .passwordParameter("pw")
                     .usernameParameter("user")
                     .authenticationDetailsSource(new WebAuthenticationDetailsSource());
-              }) // pas de .and(), retourne HttpSecurity directement
+              }) // no .and(), returns HttpSecurity directly
             ```
 
             Notes:
 
-            - 3 façons d'intéragir avec les configurers "built-in"
-              - dans la filter chain
-              - en dehors
-              - avec un "customizer", ça crée le Configurer et le "modifie" tout de suite
-                - intérêt: Kotlin!
+            - 3 ways to interact with built-in configurers
+              - in the filter chain with method chaining
+              - outside the chain
+              - with a lambda customizer
+                - Who knows Kotlin ??
 
             ---
 
@@ -1511,8 +1546,8 @@
 
             Notes:
 
-            - Qui fait du Kotlin?
-            - Semblable à la DSL Kotlin pour spring MVC / router { } (cf: KoFu)
+            - Very similar to Kotlin Spring-MVC DSL (router { }...)
+              - cf KoFu
 
             ---
 
@@ -1543,22 +1578,24 @@
 
             ## PostProcessor
 
-            Comment étendre une classe Spring Security? Exemple:
+            How to extend a SpringSecurity class? Example:
 
-            > Rate-limit par utilisateur, pour le login Google (pas plus de 1 login / minute par
-              user)
+            > Apply rate-limiting, per-user, for Google Login.
+            > Max 1 login / minute / user
 
             Notes:
 
-            - Montrer classe finale (problème pour faire Extends!)
+            - Show the final classes
               - InMemoryOAuth2AuthorizedClientService
               - MappedJwtClaimSetConverter
-            - Parler du use-case
-            - Traces:
-              - Montrer OidcAuthorizationCodeAuthenticationProvider
-              - Montrer que c'est configurable
-            - On pourrait faire un custom provider
-            - mais plutôt ObjectPostProcessor
+            - Explain the use-case
+            - Traces: run a google login with tracing ON
+              - Show OidcAuthorizationCodeAuthenticationProvider
+              - Show it is configurable
+              - We could extend it, but what's the user service? what's the token client?
+            - We could wire it all by hand
+            - Use an object post-processor instead
+              - Trust spring-security, sprinkle it with our behavior on top
 
             ---
 
@@ -1582,9 +1619,8 @@
 
             Notes:
 
-            - On veut faire la même chose
-            - PLUS! un peu de logique
-            - Pattern du delegate
+            - We want to do the same, but with an extrat bit of logic
+            - We wcould extend, but how do we wire it up?
 
             ---
 
@@ -1608,8 +1644,11 @@
 
             Note:
 
-            - Donc on wrappe le truc!
-            - On pourrait en créer un nouveau mais ça poserait le même problème de construction
+            - Instead, wrap an existing object
+              - Classic spring-security pattern, as lots of classes are "final"
+              - Not in this specific case, but majority
+            - Delegate pattern
+            - We could re-create but then we have the same constructor issues
 
             ---
 
@@ -1636,8 +1675,8 @@
 
             Note:
 
-            - Pitié ne faites pas ça hin, c'est juste pour montrer un exemple
-              - Pas faire du "vrai" cache
+            - Please don't do this in prod, though'
+            - It is just an example
 
             ---
 
@@ -1663,10 +1702,10 @@
 
             Notes:
 
-            - Montrer SecurityConfig .withObjectPostProcessor
-            - Montrer comment ça marche
-            - Créer post-processor avec OidcAuthorizationCodeAuthenticationProvider d''abord
-            - On veut restreindre à ce qui nous intéresse vraiment (secure by default!!)
+            - In SecurityConfig show .withObjectPostProcessor
+            - Show how it works
+            - Create OidcAuthorizationCodeAuthenticationProvider post-processor
+              - Only the types we want to touch, lets be secure by default
              
             ---
 
@@ -1693,9 +1732,8 @@
 
             Notes:
 
-            - Câbler
-            - Démo
-            - Paramétriser trop compliqué
+            - Wire it up
+            - Show how it works
 
             ---
 
@@ -1709,9 +1747,10 @@
 
             Notes:
 
-            - On va changer notre RobotAccountFilter pour adhérer aux patterns spring sec
-              - "composability"
-              - découpage en "roles"
+            - Change our RobotAccountFilter
+              - Make it more like spring-sec
+              - "Composability"
+              - "roles" for each bit of this sequential process
 
             ---
 
@@ -1749,23 +1788,24 @@
 
             ---
 
-            ## Plan
+            ## Contents
 
-            1. Démo de base
-            2. Théorie
+            1. Demo: a baseline
+            2. Theory
                 1. Authentication - "domain language"
-                2. Filter - "bloc de base HTTP"
-                3. AuthenticationProviders - "authentifier"
-                4. Configurers - "naviguer dans spring-security"
+                2. Filter - "HTTP building block"
+                3. AuthenticationProviders - "to authenticate"
+                4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration <!-- .element: class="fragment highlight-blue" -->
 
             Notes:
 
-            - Enfin...
-              - Spring Boot fait plein de choses, un petit mot pour comment découvrir comment les
-                choses sont auto-câblées
-              - spring-boot-autoconfigure
-                - security, oauth2
+            - GETTING TO THE END
+              - Spring Boot does _a lot_
+              - How to find what happens? what is autowired for me?
+              - spring-boot-starter-oauth2 -> just pulls in dependencies
+              - spring-boot-autoconfigure package, security > oauth2
+            - Show that "google" in the properties is magic
             
             ---
 
@@ -1808,7 +1848,7 @@
         center: true,
         hash: true,
         width: 1280,
-        height: 800,
+        height: 720,
         transition: 'none',
         slideNumber: true,
         center: false,
