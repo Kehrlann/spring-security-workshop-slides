@@ -4,7 +4,7 @@
 	<head>
 		<meta charset="utf-8">
 
-		<title>Spring Security - The Good Parts™</title>
+		<title>Spring Security - Demystified 🕵️</title>
 
 		<meta name="description" content="...">
 		<meta name="author" content="Daniel Garnier-Moiroux">
@@ -72,19 +72,21 @@
                   data-background-position="bottom 20px left 30px"
                   >
           <script type="text/template">
-            ## Spring Security - The Good Parts™
+            ## Spring Security - Demystified 🕵️
 
             <img src="images/profile_picture.jpeg" height="200px" style="border-radius: 50%;">
 
-            Voxxed Days Zürich - 2023/03/16
+            Devoxx - 2022/10/11
 
             Daniel Garnier-Moiroux
+
+            <button title="Click to open speaker notes view" onclick="Reveal.triggerKey(83)">📝</button>
 
             ---
 
             ## Daniel Garnier-Moiroux
 
-            <img src="images/avatar.jpg" height="200px" style="border-radius: 50%;">
+            <img src="images/profile_picture.jpeg" height="200px" style="border-radius: 50%;">
 
             Software Engineer @ VMware (Tanzu Spring)
 
@@ -95,6 +97,7 @@
             @Kehrlann
 
 
+            
             Notes:
             That's me. Find me on the internet.
 
@@ -110,8 +113,8 @@
 
             1. Demo: a baseline <!-- .element: class="fragment highlight-blue" -->
             2. Theory
-                1. Filter - "HTTP building block"
-                2. Authentication - "domain language"
+                1. Authentication - "domain language"
+                2. Filter - "HTTP building block"
                 3. AuthenticationProviders - "to authenticate"
                 4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration
@@ -128,6 +131,8 @@
             - Focus on authentication == identity, not so much on authorization
             - Only Servlet, no WebFlux (reactive)
               - Primitives are slightly different, no expert
+            - Not Spring Security 6.0, although won't change EVERYTHING
+              - The patterns are forward-compatible
             - Caveat: Intermediate level, NOT beginner
               - If you don't know spring, this may hurt
 
@@ -137,20 +142,270 @@
 
             Follow-along:
 
-            https://github.com/Kehrlann/spring-security-the-good-parts-code
+            https://github.com/Kehrlann/spring-security-workshop-code
 
             Notes:
 
             - start.spring.io
             - gradle
             - java 17 (why not!)
-            - Boot 3.0.x
+            - Boot 2.7.x
             - web
             - NO dev tools, no security
 
             ---
+            
+            ## HelloWorldController.java
 
-            ## Demo time!
+            ```java
+            @RestController
+            public class HelloWorldController {
+
+              @GetMapping("/")
+              public String publicPage() {
+                return "Hello World!";
+              }
+
+              @GetMapping("private")
+              public String privatePage() {
+                return "Mmmmh, this should be private 🤔";
+              }
+
+            }
+            ```
+
+            Notes:
+
+            - Classic Spring Boot, two pages, public and private
+            - Show in browser
+
+            ---
+
+            ## build.gradle
+
+            ```gradle [3]
+            dependencies {
+              implementation 'org.springframework.boot:spring-boot-starter-web'
+              implementation 'org.springframework.boot:spring-boot-starter-security'
+              testImplementation 'org.springframework.boot:spring-boot-starter-test'
+            }
+            ```
+
+            Notes:
+
+            - Add Spring Security
+            - Show in browser
+            - Show logs
+            - Show SecurityAutoConfiguration
+            - SPRINGSEC PATTERN: secure by default
+              - show 403 everywhere
+              - Do the same in your apps!
+
+            ---
+
+            ## SecurityConfig.java
+
+            ```java
+            @Configuration
+            @EnableWebSecurity
+            public class SecurityConfig {
+
+              @Bean
+              SecurityFilterChain securityFilterChain(HttpSecurity http) 
+                  throws Exception {
+                return http.authorizeRequests()
+                      .antMatchers("/").permitAll()
+                      .antMatchers("/error").permitAll() // error page
+                      .antMatchers("/favicon.io").permitAll() // favicon
+                      .anyRequest().authenticated()
+                    .and().build();
+              }
+            }
+            ```
+
+            Notes:
+
+            - SecurityFilterChain
+            - First: "/private" .authenticated()
+            - Then correct pattern
+            - Notice: we can't log in!
+
+            ---
+
+            ## SecurityConfig.java
+
+            ```java [11]
+            public class SecurityConfig {
+
+              @Bean
+              SecurityFilterChain securityFilterChain(HttpSecurity http) 
+                  throws Exception {
+                return http.authorizeRequests()
+                      .antMatchers("/").permitAll()
+                      .antMatchers("/error").permitAll() // error page
+                      .antMatchers("/favicon.io").permitAll() // favicon
+                      .anyRequest().authenticated()
+                    .and().formLogin()
+                    .and().build();
+              }
+            }
+            ```
+
+            Notes:
+
+            - Put login form back in
+            - Still auto-generated password
+
+            ---
+
+            ## SecurityConfig.java
+
+            ```java [13-14]
+            @Configuration
+            @EnableWebSecurity
+            public class SecurityConfig {
+              // [...]
+              @Bean
+              UserDetailsService userDetailsService() {
+                return new InMemoryUserDetailsManager(
+                    new User("user", "{noop}password", Collections.emptyList())
+                );
+              }
+            }
+            ```
+
+            Notes:
+
+            - We can create @Beans that do things
+            - Find it in the guides
+            - CF spring sec doc
+            - Demo
+            - Now we can turn on other spring-sec modules
+
+            ---
+
+            ## build.gradle
+
+            ```gradle [4]
+            dependencies {
+              implementation 'org.springframework.boot:spring-boot-starter-web'
+              implementation 'org.springframework.boot:spring-boot-starter-security'
+              implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
+              testImplementation 'org.springframework.boot:spring-boot-starter-test'
+            }
+            ```
+
+            Notes:
+
+            - Login with OAuth2 / OpenID
+            - Are you familiar with OAuth2 ?
+            - We won't describe the protocol in detail
+            - Boot + Security: change the config,
+            - => activate a new login type
+            
+            ---
+
+            ## SecurityConfig.java
+
+            ```java [12]
+            public class SecurityConfig {
+
+              @Bean
+              SecurityFilterChain securityFilterChain(HttpSecurity http) 
+                  throws Exception {
+                return http.authorizeRequests()
+                      .antMatchers("/").permitAll()
+                      .antMatchers("/error").permitAll() // error page
+                      .antMatchers("/favicon.io").permitAll() // favicon
+                      .anyRequest().authenticated()
+                    .and().formLogin();
+                    .and().oauth2Login()
+                    .and().build();
+              }
+            }
+            ```
+
+            Notes:
+
+            - Activate new login
+            - Spring Security Pattern: all config in one place!
+
+            ---
+
+            ## application.yml
+
+            ```yaml
+            spring:
+             security:
+              oauth2:
+               client:
+                 registration:
+                   google: # magic name, [google|facebook|github]
+                    client-id: "PLACEHOLDER"
+                    client-secret: "PLACEHOLDER"
+            ``` 
+
+            Notes:
+
+            - Add Google through console.cloud.google.com
+            - Search Api Keys, Add new OAuth2 Login
+            - redirect url: 
+
+            `http://localhost:8080/login/oauth2/code/google`
+
+            - Configure client-id/secret, login: tadaa!
+            - Now, let's USE the authentication data
+
+            ---
+
+            ## HelloWorldController.java
+
+            ```java [3-8]
+            public class HelloWorldController {
+
+              @GetMapping("private")
+              public String privatePage(Authentication authentication) {
+                return "Welcome to this very private page, ~[" 
+                    + getName(authentication)
+                    + "]~! 🥳🎉🍾";
+              }
+
+              private String getName(Authentication authentication) {
+                // ...
+              }
+            }
+            ```
+
+            Notes:
+
+            - Inject the Authentication
+              - Spring Security Pattern: injection!
+            - Print the name: for Google, ugly `sub` claim
+            - We can extract the email claim
+
+            ---
+
+            ## HelloWorldController.java
+
+            ```java
+            public class HelloWorldController {
+
+              private String getName(Authentication authentication) {
+                return Optional.of(authentication)
+                  .filter(OAuth2AuthenticationToken.class::isInstance)
+                  .map(OAuth2AuthenticationToken.class::cast)
+                  .map(OAuth2AuthenticationToken::getPrincipal)
+                  .map(OidcUser.class::cast)
+                  .map(StandardClaimAccessor::getEmail)
+                  .orElseGet(authentication::getName);
+              }
+            }
+            ```
+
+            Notes:
+
+            - Touchy though, I have notes
+            - Requires breakpoint + inspecting Authentication
 
             ---
 
@@ -169,8 +424,8 @@
 
             1. Demo: a baseline
             2. Theory
-                1. Filter - "HTTP building block" <!-- .element: class="fragment highlight-blue" -->
-                2. Authentication - "domain language"
+                1. Authentication - "domain language" <!-- .element: class="fragment highlight-blue" -->
+                2. Filter - "HTTP building block"
                 3. AuthenticationProviders - "to authenticate"
                 4. Configurers - "navigate Spring Security"
                 5. Spring Boot Auto-Configuration
