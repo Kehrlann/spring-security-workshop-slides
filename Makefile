@@ -20,8 +20,8 @@ reveal.js: highlight.js
 	@echo "🔨 Installing reveal.js..."
 	@cd reveal.js
 	@npm install
-	@echo "🔨 Installing reveal.js notes server..."
-	@npm install reveal-notes-server
+	#@echo "🔨 Installing reveal.js notes server..."
+	#@npm install reveal-notes-server
 	@cd ..
 	@echo "🔨 Linking highlight.js..."
 	@cp highlight.js/build/styles/*.css reveal.js/plugin/highlight
@@ -34,13 +34,8 @@ clean:
 .PHONY: install
 install: reveal.js highlight.js
 
-.PHONY: serve
-serve: install
-	@cd reveal.js
-	@node node_modules/reveal-notes-server
-
-.PHONY: dev
-dev: install
+.PHONY: start
+start: install
 	@cd reveal.js
 	@npm run start
 
