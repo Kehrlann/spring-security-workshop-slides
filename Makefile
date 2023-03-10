@@ -43,3 +43,32 @@ serve: install
 dev: install
 	@cd reveal.js
 	@npm run start
+
+.PHONY: extract-notes
+extract-notes:
+	@if [[ -z "$(FILE)" ]]; then
+		echo "Please specify which file to extract notes from through a \$$FILE variable"
+		exit 1
+	fi
+	awk "
+	/## / {
+		print $0
+	}
+	
+	/Notes:/ {
+		flag=1
+		next
+	}
+	
+	/---/ {
+		flag=0
+		print $0
+	}
+
+	# End of the presentation
+	/<\/script>/ {
+		flag = 0
+	}
+	
+	flag
+	" $(FILE)
