@@ -109,7 +109,6 @@
                 2. Authentication - "domain language"
                 3. AuthenticationProviders - "to authenticate"
                 4. Configurers - "navigate Spring Security"
-                5. Spring Boot Auto-Configuration
 
             ---
 
@@ -117,15 +116,9 @@
 
             # 🍃🔐
 
-            > Follow-along:
+            > Source:
             >
             > https://github.com/Kehrlann/spring-security-the-good-parts-code
-
-            ---
-
-            ## So?
-
-            A bit ... complex, isn't it? <!-- .element: class="fragment" -->
 
             ---
 
@@ -252,7 +245,6 @@
                 2. Authentication - "domain language" <!-- .element: class="fragment highlight-blue" -->
                 3. AuthenticationProviders - "to authenticate"
                 4. Configurers - "navigate Spring Security"
-                5. Spring Boot Auto-Configuration
 
             ---
 
@@ -293,33 +285,6 @@
             > Servlet Applications
                 > Authentication
                     > Architecture
-            ```
-
-            ---
-
-            ## Consequence...
-
-            ```java
-            @Override
-            public boolean supports(final Class<?> authentication) {
-              return (UsernamePasswordAuthenticationToken.class.isAssignableFrom(authentication))
-                  || (CasAuthenticationToken.class.isAssignableFrom(authentication))
-                  || (CasAssertionAuthenticationToken.class.isAssignableFrom(authentication));
-            }
-            ```
-
-            ---
-
-            ## Maximum confusion
-
-            ```java [|2|6]
-            public interface Authentication 
-              extends Principal,
-              Serializable {
-
-              // [...]
-              Object getPrincipal();
-            }
             ```
 
             ---
@@ -439,14 +404,15 @@
 
             1. Demo: a baseline
             2. Theory
-                1. Authentication - "domain language"
+                1. Filter - "HTTP building block"
+                2. Authentication - "domain language"
                 3. AuthenticationProviders - "to authenticate"
                 4. Configurers - "navigate Spring Security" <!-- .element: class="fragment highlight-blue" -->
 
             ---
 
             ## Resources
-            
+
             - Slides repo: 
               - https://github.com/Kehrlann/spring-security-workshop-slides/
             - Code:
@@ -454,31 +420,6 @@
             - Me:
               - @Kehrlann
               - https://garnier.wf
-
-
-            ---
-
-            ## ... Take a deep breath 🧘 ...
-
-            <img src="images/kitten.gif" height="500px">
-
-            Notes:
-            
-            - I promise, we're almost done with the big chunck of theory
-            - We're going to get coding
-            - Take a deep breath, stretch
-
-            ---
-
-            ## ... Take a deep breath 🧘 ...
-
-            <img src="images/puppy.gif" height="500px">
-
-            Notes:
-            
-            - There's no reason only kitten lovers get their share of gifs, so here are some puppies
-            - Alright, let's code! Let's go!
-
           </script>
         </section>
       </div>
