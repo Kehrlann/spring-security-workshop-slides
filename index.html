@@ -411,6 +411,16 @@
 
             ---
 
+            ## tl;dr
+
+            1. `Filter` for security decision on HTTP requests
+            2. `AuthenticationProvider` for custom login
+                - with existing filters, see `Configurers`
+            3. `Filter` + `AuthenticationProvider` for custom login
+                - 🚫 Don't do login in your `@Controller` 🚫
+
+            ---
+
             ## Resources
 
             - Slides repo: 
